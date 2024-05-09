@@ -1,0 +1,1 @@
+<div id="<?php echo $id; ?>"></div><?php /**PATH /home2/pixelar6/micromed.book-medical.com/vendor/arielmejiadev/larapex-charts/src/../stubs/resources/views/chart/container.blade.php ENDPATH**/ ?>
