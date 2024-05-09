@@ -7185,3 +7185,27 @@
 [stacktrace]
 #0 {main}
 "} 
+[2024-05-09 11:28:14] local.ERROR: Cannot redeclare active_class() (previously declared in C:\laragon\www\laboratorios\app\helpers.php:3) {"exception":"[object] (Symfony\\Component\\ErrorHandler\\Error\\FatalError(code: 0): Cannot redeclare active_class() (previously declared in C:\\laragon\\www\\laboratorios\\app\\helpers.php:3) at C:\\laragon\\www\\laboratorios\\app\\helpers.php:3)
+[stacktrace]
+#0 {main}
+"} 
+[2024-05-09 11:29:14] local.ERROR: Cannot redeclare active_class() (previously declared in C:\laragon\www\laboratorios\app\helpers.php:3) {"exception":"[object] (Symfony\\Component\\ErrorHandler\\Error\\FatalError(code: 0): Cannot redeclare active_class() (previously declared in C:\\laragon\\www\\laboratorios\\app\\helpers.php:3) at C:\\laragon\\www\\laboratorios\\app\\helpers.php:3)
+[stacktrace]
+#0 {main}
+"} 
+[2024-05-09 11:30:14] local.ERROR: Cannot redeclare active_class() (previously declared in C:\laragon\www\laboratorios\app\helpers.php:3) {"exception":"[object] (Symfony\\Component\\ErrorHandler\\Error\\FatalError(code: 0): Cannot redeclare active_class() (previously declared in C:\\laragon\\www\\laboratorios\\app\\helpers.php:3) at C:\\laragon\\www\\laboratorios\\app\\helpers.php:3)
+[stacktrace]
+#0 {main}
+"} 
+[2024-05-09 11:31:14] local.ERROR: Cannot redeclare active_class() (previously declared in C:\laragon\www\laboratorios\app\helpers.php:3) {"exception":"[object] (Symfony\\Component\\ErrorHandler\\Error\\FatalError(code: 0): Cannot redeclare active_class() (previously declared in C:\\laragon\\www\\laboratorios\\app\\helpers.php:3) at C:\\laragon\\www\\laboratorios\\app\\helpers.php:3)
+[stacktrace]
+#0 {main}
+"} 
+[2024-05-09 11:32:14] local.ERROR: Cannot redeclare active_class() (previously declared in C:\laragon\www\laboratorios\app\helpers.php:3) {"exception":"[object] (Symfony\\Component\\ErrorHandler\\Error\\FatalError(code: 0): Cannot redeclare active_class() (previously declared in C:\\laragon\\www\\laboratorios\\app\\helpers.php:3) at C:\\laragon\\www\\laboratorios\\app\\helpers.php:3)
+[stacktrace]
+#0 {main}
+"} 
+[2024-05-09 11:33:14] local.ERROR: Cannot redeclare active_class() (previously declared in C:\laragon\www\laboratorios\app\helpers.php:3) {"exception":"[object] (Symfony\\Component\\ErrorHandler\\Error\\FatalError(code: 0): Cannot redeclare active_class() (previously declared in C:\\laragon\\www\\laboratorios\\app\\helpers.php:3) at C:\\laragon\\www\\laboratorios\\app\\helpers.php:3)
+[stacktrace]
+#0 {main}
+"} 
