@@ -18,7 +18,7 @@ class RecepcionsHasDeparments extends Migration
             $table->unsignedBigInteger('recepcions_id');
             $table->unsignedBigInteger('deparments_id');
             $table->unsignedBigInteger('picture_id');
-            $table->string('estatus_area')->default('no validado');
+            $table->string('estatus_area')->default('no validado')->nullable(true);
             $table->timestamps();
 
             $table->foreign('recepcions_id')->references('id')->on('recepcions')->onDelete('restrict')->onUpdate('cascade');

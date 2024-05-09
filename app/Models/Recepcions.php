@@ -4,15 +4,17 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Facades\URL;
-use Milon\Barcode\DNS2D;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class Recepcions extends Model
 {
     use HasFactory;
     use SoftDeletes;
+    use LogsActivity;
+
+    protected static $recordEvents = ['created', 'updated','deleted'];
 
     public $fillable = ['folio', 
                         'h_flebotomia', 
@@ -48,11 +50,21 @@ class Recepcions extends Model
 
     ];
 
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['updated_at', 'deleted'])
+            ->useLogName('recepcion')
+            ->setDescriptionForEvent(fn(string $eventName) => "Folio {$eventName}");
+    }
 
     public function getContador(){
-        $total = count($this->estudios()->get());
+        
+        $total = $this->estudios()->count();
         $validados = count($this->estudios()->where('status', 'validado')->get());
-        return $validados . " de " . $total;
+        // return $validados . " de " . $total;
+        return $validados . " validados." ;
+
     }
 
     public function getEstado(){
@@ -63,6 +75,22 @@ class Recepcions extends Model
         }else{
             return 'solicitado';
         }
+    }
+
+    public function getNamePatient(){
+        return $this->paciente()->first()->nombre;
+    }
+
+    public function getNameDoctor(){
+        return $this->doctores()->first()->nombre;
+    }
+
+    public function getNameEmpresa(){
+        return $this->empresas()->first()->descripcion;
+    }
+    
+    public function getAnticipos(){
+        return ($this->pago()->count() == 1 && $this->estado == 'no pagado' ) ? "$ " . $this->pago()->first()->importe : "$ 0" ;
     }
 
     public function empresas(){

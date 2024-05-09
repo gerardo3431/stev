@@ -34,7 +34,6 @@ $(function() {
         var CSRF_TOKEN = $('meta[name="csrf-token"]').attr('content');
 
         const selectedValue = e.params.data.clave;
-        // console.log(e.params.data);
         if (selectedValues.includes(selectedValue)) {
             alert('Este elemento ya fue seleccionado previamente');
             // $(this).val(null).trigger('change'); // Deseleccionar el valor

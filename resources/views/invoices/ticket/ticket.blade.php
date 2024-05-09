@@ -135,6 +135,9 @@
             <strong>Edad: </strong> {{ $edad }}
         </p>
         <p>
+            <strong>Fecha nacimiento: </strong> {{ $paciente->fecha_nacimiento }}
+        </p>
+        <p>
             <strong> Folio: </strong> {{ $folios->folio}}
         </p>
         @if (auth()->user()->first()->labs()->first()->paquete()->first()->paquete == 'completo')
@@ -174,12 +177,12 @@
     </table>
 
     <div class="text-right text-bg">
-        <p>Subtotal:  $ {{$estudios->sum('precio')}}</p>
-        <p>Descuento: $ {{$folios->descuento}}</p>
+        <p>Subtotal:  $ {{ $estudios->sum('precio') }}</p>
+        <p>Descuento: $ {{ $folios->descuento }}</p>
         <h3>Total:    $ {{ $estudios->sum('precio') - $folios->descuento }}</h3>
-        <p>Pago:      $ {{$pago->importe}}</p>
-        <p>Pendiente: $ {{$estudios->sum('precio') - $folios->pago()->sum('importe')}}</p>
-        <p>Método:    {{$pago->metodo_pago}}</p>
+        <p>Pago:      $ {{ $pago->importe }}</p>
+        <p>Pendiente: $ {{ (( $estudios->sum('precio') - $folios->pago()->sum('importe')) - $folios->descuento) }}</p>
+        <p>Método:    {{ $pago->metodo_pago }}</p>
     </div>
 
     <div class="justify text-bg">

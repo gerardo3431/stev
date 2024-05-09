@@ -1,14 +1,6 @@
 <!DOCTYPE html>
   <HTML lang="es">
-<!--
-Template Name: NobleUI - Laravel Admin Dashboard Template
-Author: NobleUI
-Website: https://www.nobleui.com
-Portfolio: https://themeforest.net/user/nobleui/portfolio
-Contact: nobleui123@gmail.com
-Purchase: https://1.envato.market/nobleui_laravel
-License: For each use you must have a valid license purchased only from above link in order to legally use the theme for your project.
--->
+
 <html>
 <head>
   <meta charset="UTF-8">

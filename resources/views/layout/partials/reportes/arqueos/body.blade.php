@@ -1,104 +1,77 @@
+@php
+    $total = 0;
+    $descuentos = 0;
+    $solicitudes = 0;
+@endphp
 <div class="invoice-content">
-    <div style="line-height: 0.5">
-    </div>
-    <table class="result ">
+    <table >
         <thead>
             <tr>
-                <th>Folio</th>
-                <th>Paciente</th>
-                <th>Medico</th>
-                <th>Empresa</th>
-                <th>Monto</th>
-                <th>Anticipo</th>
-                <th>Adeudo</th>
-                <th>Descuento</th>
-                <th>Fecha</th>
+                <th>FOLIO</th>
+                <th>PACIENTE</th>
+                <th>MEDICO</th>
+                <th>EMPRESA</th>
+                <th>MONTO</th>
+                <th>ANTICIPO</th>
+                <th>ADEUDO</th>
+                <th>DESCUENTO</th>
+                <th>FECHA</th>
             </tr>
         </thead>
         <tbody>
+            
             @foreach ($folios as $key=> $folio)
                 <tr>
-                    <td>{{$folio->folio}}</td>
-                    <td><p>
-                        {{$folio->paciente()->first()->nombre}}
-                        </p>
+                    <td class="border-none">
+                        {{$folio->folio}}
                     </td>
-                    <td>
-                        <p>
-                            {{$folio->doctores()->first()->nombre}}
-                        </p>
+                    <td class="border-none">
+                        {{$folio->paciente}}
+                        
                     </td>
-                    <td>
-                        <p>
-                            {{$folio->empresas()->first()->descripcion}}
-                        </p>
+                    <td class="border-none">
+                        {{$folio->doctor}}
                     </td>
-                    <td>
-                        $ {{$folio->lista()->sum('precio')}}
+                    <td class="border-none">
+                        {{$folio->empresa}}
                     </td>
-                    <td>
-                        @php
-                            if($folio->pago()->count() == 1 && $folio->estado == 'no pagado' ){
-                                echo '$ ' . $folio->pago()->first()->importe;
-                            }else{
-                                // echo '$ ' .  $folio->pago()->first()->importe;
-                                echo '$ 0 ';
-                            }
-                        @endphp
+                    {{-- Monto --}}
+                    <td class="border-none">
+                        $ {{$folio->total}}
                     </td>
-                    <td>
-                        @php
-                            if($folio->estado == 'pagado'){
-                                // echo $suma - $folio->pago()->first()->importe;
-
-                                echo '$ 0';
-                            }else{
-                                // echo $folio->pago()->first()->importe;
-                                if($folio->pago()->first() == null){
-                                    echo '$ 0';
-                                }else {
-                                    # code...
-                                    echo ($folio->lista()->sum('precio')) - $folio->pago()->first()->importe;
-                                }
-                            }
-                        @endphp
+                    {{-- Anticipo --}}
+                    <td class="border-none">
+                        $ {{$folio->anticipo}}
+                    </td class="border-none">
+                    {{-- Adeudos --}}
+                    <td class="border-none">
+                        $ {{$folio->estado}}
                     </td>
-                    {{-- <td>{{(isset($folio->pago()->first()->tipo_movimiento)) ? $folio->pago()->first()->tipo_movimiento : 'undefined'}}</td> --}}
-                    <td>$ {{ $folio->descuento}}</td>
-                    {{-- <td>{{$folio->estado}}</td> --}}
-                    <td>{{$folio->created_at}}</td>
+                    <td class="border-none">$ {{ $folio->descuento}}</td>
+                    @php
+                        $descuentos += $folio->descuento;
+                    @endphp
+                    <td class="border-none">{{$folio->fecha}}</td>
                 </tr>
                 <tr>
                     <td  colspan="9">
                         <strong>Estudios: </strong>
-                        @forelse ($folio->lista()->get() as $estudio)
-                            <span>{{$estudio->clave}} </span>
-                        @empty
-                        @endforelse
+                        <span>
+                            @forelse ($folio->estudios as $estudio)
+                                * {{$estudio}} 
+                            @empty
+                            @endforelse
+                        </span>
                     </td>
                 </tr>
             @endforeach
         </tbody>
     </table>
-    <?php
-        $total = 0;
-        $descuentos = 0;
-        $solicitudes = 0;
-        foreach ($folios as $key => $value) {
-            $total = $total + intval($value->num_total);
-            $descuentos = $descuentos + $value->descuento;
-            $solicitudes++;
-
-        }
-    ?>
     <p>
         <strong>Total: </strong> $ {{$total}} <br>
         <strong>Descuentos: </strong> $ {{$descuentos}} <br>
         <strong>Total real: </strong> $ {{$total - $descuentos}} <br>
-        <strong>Solicitudes: </strong> {{$solicitudes}}
+        <strong>Solicitudes: </strong> {{$folios->count()}}
     </p>
-
-    {{-- Segunda página --}}
-    {{-- <p class="break"></p> --}}
 
 </div>

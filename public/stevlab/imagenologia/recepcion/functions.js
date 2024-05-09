@@ -93,8 +93,7 @@ $(function(){
         })
         .then(res => {
             console.log(res);
-            let dato = res.data.imagenologias;
-            
+            let dato = res.data.imagenologia;
             let titulo = `  <h3>Folio: <span class="badge bg-secondary folioCaptura">${folio}</span></h3>
                             <br>
                             <div class="mb-3">
@@ -105,41 +104,73 @@ $(function(){
             $('#modalEstudio').modal('show');
             $('#appendComponente').append(titulo);
             let observacion_texto = get_observacion_general(folio);
-
-            dato.forEach(element => {
+            dato.forEach(function (element, index){
                 console.log(element);
                 let estudio = element;
-                let analito = element.analitos;
-                let id = element.id;
+                let analitos = element.analitos;
 
-                let referencia = element.clave;
-                let componente = componente_principal_img(referencia, folio, estudio);
+                let componente = componente_principal_img(element.clave, folio, estudio);
                 $('#appendComponente').append(componente);
-
-                analito.forEach(function(analito, key){
+                analitos.forEach(analito =>{
                     let clave = analito.clave;
                     let tipo = analito.tipo_resultado;
-                    let analito_tipo = componente_analito(analito , tipo);
-                    // console.log(analito.clave + ': ' + tipo + ' - ' + analito.tipo_referencia);
-                    if(tipo == 'documento'){
-                        
-                        $('.asignEstudio' + estudio.clave).find('.asignAnalito'+ estudio.id).append(analito_tipo);
-                        setTimeout(() => {
-                            textarea(analito.clave, analito.documento, estudio.clave);
-                        }, 1000);
-                    }else if(tipo == 'imagen'){
-                        $('.asignAnalito'+ estudio.id).append(analito_tipo);
-                        
-                    }else{
+
+                    let analito_tipo = componente_analito(analito, element.validacion);
+
+                    switch (tipo) {
+                        case 'subtitulo':
+                            $('.asignAnalito'+ estudio.id).append(analito_tipo);
+                            break;
+                        case 'documento':
+                            $('.asignEstudio' + estudio.clave).find('.asignAnalito'+ estudio.id).append(analito_tipo);
+                            setTimeout(() => {
+                                // textarea(analito.clave, analito.documento, estudio.clave);
+                                textarea(analito.clave, analito.documento, estudio.clave, (element.validacion === 'validado' ? true : false ));
+                            }, 1000);
+                            break;
+                        case 'imagen':
+                            $('.asignAnalito'+ estudio.id).append(analito_tipo);
+                            $('.dropImagen').dropify();
+                            break;
+                        default:
+                            break;
                     }
                 });
-                // Verificacion de resultados
-                verifica_resultados(folio, referencia, analito);
             });
+            
+            // dato.forEach(element => {
+            //     let estudio = element;
+            //     let analito = element.analitos;
+            //     let id = element.id;
 
-            setTimeout(() => {
-                dropzones();
-            }, 1000);
+            //     let referencia = element.clave;
+            //     let componente = componente_principal_img(referencia, folio, estudio);
+            //     $('#appendComponente').append(componente);
+
+            //     analito.forEach(function(analito, key){
+            //         let clave = analito.clave;
+            //         let tipo = analito.tipo_resultado;
+            //         let analito_tipo = componente_analito(analito , tipo);
+            //         // console.log(analito.clave + ': ' + tipo + ' - ' + analito.tipo_referencia);
+            //         if(tipo == 'documento'){
+                        
+            //             $('.asignEstudio' + estudio.clave).find('.asignAnalito'+ estudio.id).append(analito_tipo);
+            //             setTimeout(() => {
+            //                 textarea(analito.clave, analito.documento, estudio.clave);
+            //             }, 1000);
+            //         }else if(tipo == 'imagen'){
+            //             $('.asignAnalito'+ estudio.id).append(analito_tipo);
+                        
+            //         }else{
+            //         }
+            //     });
+            //     // Verificacion de resultados
+            //     verifica_resultados(folio, referencia, analito);
+            // });
+
+            // setTimeout(() => {
+            //     dropzones();
+            // }, 1000);
 
             $('#archivo').val(null);
             $('#imagen').val(null);
@@ -217,7 +248,11 @@ function dropzones(){
                 $(this.element).parents('.asignEstudio').find('.idAnalito').val(pars.id);
                 // $('.asignEstudio'+ estudio.clave).find('.asignAnalito'+ estudio.id).find('.idAnalito').val(pars.id);
             }
-        });    
+        });   
+        // and want to resize them in the browser:
+        // let mockFile = { name: "Filename 2", size: 12345 };
+        // myDropzone.displayExistingFile(mockFile, "https://i.picsum.photos/id/959/600/600.jpg");
+          
     });
 }
 

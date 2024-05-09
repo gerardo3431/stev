@@ -22,6 +22,7 @@ class Recipientes extends Migration
             $table->string('unidad_medida');
             $table->string('observaciones');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

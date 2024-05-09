@@ -5,8 +5,8 @@
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Noto+Sans&display=swap" rel="stylesheet"> 
 
-        @include('layout.partials.ticket.style_half')
-        {{-- @include('layout.partials.ticket.style_complete') --}}
+        {{-- @include('layout.partials.ticket.style_half') --}}
+        @include('layout.partials.ticket.style_complete')
     </head>
     <body>
         <div id="image">

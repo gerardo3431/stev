@@ -13,9 +13,6 @@
     <?php endif; ?>
 <?php endif; ?>
 
-<?php if($resultados !== null && $perfiles !== null): ?>
-    <div class="break"></div>
-<?php endif; ?>
 
 <?php if($perfiles !== null): ?>
     <?php $__empty_1 = true; $__currentLoopData = $perfiles; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $keyPerfil => $perfil): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>

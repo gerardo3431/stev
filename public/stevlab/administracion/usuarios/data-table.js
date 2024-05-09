@@ -5,7 +5,7 @@ $(function() {
         var datatable = $('#tableUsuarios').DataTable({
             "order": [ 0, 'asc'],
             processing: true,
-            responsive: true,
+            // responsive: true,
             "aLengthMenu": [
                 [10, 30, 50, -1],
                 [10, 30, 50, "All"]
@@ -17,6 +17,9 @@ $(function() {
             language: {
                 url: "//cdn.datatables.net/plug-ins/1.10.20/i18n/Spanish.json",
             },
+            columnDefs: [
+                {targets : '_all', className: 'compact'}
+            ]
         });
         datatable.each(function() {
             var datatable = $(this);

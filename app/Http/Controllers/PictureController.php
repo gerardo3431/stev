@@ -127,7 +127,7 @@ class PictureController extends Controller
         // Crea relacion
         $area->picture()->save($estudio);
 
-        return redirect()->route('stevlab.catalogo.imagenologia');
+        return redirect()->route('stevlab.imagenologia.imagenologia');
     }
 
     public function update_imagenologia(Request $request){

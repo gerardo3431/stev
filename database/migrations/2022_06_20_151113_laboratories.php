@@ -28,6 +28,13 @@ class Laboratories extends Migration
             $table->string('membrete')->nullable();
             $table->string('membrete_secundario')->nullable();
             $table->string('membrete_terciario')->nullable();
+            $table->string('membrete_img')->nullable();
+            $table->string('responsable_sanitario')->default('Jhonny Joestar');
+            $table->string('cedula_sanitario')->default('132456');
+            $table->string('firma_sanitario')->default('nd');
+            $table->string('responsable_img')->default('Jhonny Joestar');
+            $table->string('cedula_img')->default('132456');
+            $table->string('firma_img')->default('nd');
             $table->boolean('inventario_inicial');
 
             $table->timestamps();

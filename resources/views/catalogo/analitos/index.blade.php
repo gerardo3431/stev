@@ -467,160 +467,161 @@
 
 
 {{-- Editar analito --}}
-@can('editar_analitos')
-    <div class="modal fade" id="modal-editar-analito" tabindex="-1" aria-labelledby="editarModalLabel" aria-hidden="true">
-        <div class="modal-dialog  modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="editarModalLabel">Editar analito</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="btn-close"></button>
-                </div>
-                <div class="modal-body">
-                    <input type="hidden" id="identificador">
-                    {{-- <form id="edit_registro_estudios" action="#" method="POST">
-                    </form> --}}
-                    <form id='edit_regisAnalito' class="form-sample" method="POST" enctype="multipart/form-data">
-                        {{-- @csrf --}}
-                        
-                        <div class="row">
-                            <div class="col-sm-3">
-                                <div class="mb-3">
-                                    <label class="form-label">Clave</label>
-                                    <input type="text"  id='edit_clave' name='clave' class="form-control " placeholder="Clave">
-                                </div>
-                            </div><!-- Col -->
-                            <div class="col-sm-9">
-                                <div class="mb-3">
-                                    <label class="form-label">Descripción</label>
-                                    <input type="text"  id='edit_descripcion' name="descripcion" class="form-control" placeholder="Descripción">
-                                </div>
-                            </div><!-- Col -->
-                            
-                        </div><!-- Row -->
-                        <div class="row">
-                            <div class="col-sm-3">
-                                <div class="mb-3">
-                                    <label class="form-label">Bitacora</label>
-                                    <input type="text"  id='edit_bitacora' name="bitacora" class="form-control" placeholder="Bitacora">
-                                </div>
-                            </div><!-- Col -->
-                            <div class="col-sm-9">
-                                <div class="mb-3">
-                                    <label class="form-label">Resultado por defecto</label>
-                                    <input type="text"  id='edit_defecto' name="defecto" class="form-control" placeholder="Resultado">
-                                </div>
-                            </div><!-- Col -->
-                            
-                        </div><!-- Row -->
-                        <div class="row">
-                            <div class="col-sm-3">
-                                <div class="mb-3">
-                                    <label class="form-label">Unidad</label>
-                                    <input type="text"  id='edit_unidad' name="unidad" class="form-control" placeholder="Unidad">
-                                </div>
-                            </div><!-- Col -->
-                            <div class="col-sm-3">
-                                <div class="mb-3">
-                                    <label class="form-label">Dígitos</label>
-                                    <input type="number"  id='edit_digito' name="digito" min='0' class="form-control " placeholder="Digitos">
-                                </div>
-                            </div><!-- Col -->
-                            <div class="col-sm-6">
-                                <div class="mb-3">
-                                    <label class="form-label">Tipo resultado</label>
-                                    <select id='edit_tipo_resultado' onchange="edit_displayValues()" name="tipo_resultado" class="js-example-basic-single form-select" data-width="100%">
-                                        <option selected disabled>Seleccione</option>
-                                        <option value="subtitulo">Subtitulo</option>
-                                        <option value="texto">Texto</option>
-                                        <option value="numerico">Númerico</option>
-                                        <option value="documento">Documento</option>
-                                        <option value="referencia">Valor referenciado</option>
-                                        <option value="imagen">Imagen</option>
-                                    </select>
-                                </div>
-                            </div><!-- Col -->
-                        </div>
-                        <div class="row" id="edit_showReferencia" style="display: none;">
-                            <div class="col-sm-12">
-                                <div class="mb-3">
-                                    <label class="form-label">Referencia</label>
-                                    <input type="text" id="edit_valor_referencia" name="valor_referencia" class="form-control" placeholder="Referencia">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row" id="edit_showEstado" style="display: none;">
-                            <div class="col-sm-6">
-                                <div class="mb-4">
-                                    <div class="form-check form-check-inline">
-                                        <input type="radio" class="form-check-input" value="abierto" name='tipo_referencia' id="edit_tipo_referencia1">
-                                        <label class="form-check-label" for="radioInline">
-                                            Abierto
-                                        </label>
-                                    </div>
-                                    <div class="form-check form-check-inline">
-                                        <input type="radio" class="form-check-input" value="restringido" name='tipo_referencia' id="edit_tipo_referencia2">
-                                        <label class="form-check-label" for="radioInline1">
-                                            Restringido
-                                        </label>
-                                    </div>
-                                </div>
-                            </div><!-- Col -->
-                        </div><!-- Row -->
-                        <div class="row" id="edit_showTipoValidacion" style="display: none;">
-                            <div class="col-sm-12">
-                                <div class="mb-3">
-                                    <label class="form-label">Tipo validación</label>
-                                    <input type="text" id="edit_tipo_validacion" name="tipo_validacion" class="form-control" placeholder="Tipo validación">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row" id='edit_showNumerico' style="display: none;">
-                            <div class="col-sm-4">
-                                <div class="mb-3">
-                                    <div class="mb-3">
-                                        <label class="form-label">Número 1</label>
-                                        <input type="number" id="edit_numero_uno" name="numero_uno" min='0' class="form-control" placeholder="Número 1">
-                                    </div>
-                                </div>
-                            </div><!-- Col -->
-                            <div class="col-sm-4">
-                                <div class="mb-3">
-                                    <label class="form-label">Número 2</label>
-                                    <input type="number" id='edit_numero_dos' name="numero_dos" min='0' class="form-control" placeholder="Número 2">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row" id="edit_showDocumento" style="display: none;">
-                            <div class="col-sm-12">
-                                <div class="mb-3">
-                                    <label class="form-label">Documento</label>
-                                    <textarea class="form-control" name="documento" id="edit_documentExample" cols="30" rows="3" placeholder="Documento"></textarea>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
+<div class="modal fade" id="modal-editar-analito" tabindex="-1" aria-labelledby="editarModalLabel" aria-hidden="true">
+    <div class="modal-dialog  modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editarModalLabel">Editar analito</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="btn-close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="identificador">
+                {{-- <form id="edit_registro_estudios" action="#" method="POST">
+                </form> --}}
+                <form id='edit_regisAnalito' class="form-sample" method="POST" enctype="multipart/form-data">
+                    {{-- @csrf --}}
+                    
+                    <div class="row">
+                        <div class="col-sm-3">
                             <div class="mb-3">
-                                <label class="form-label">Validación</label>
-                                <div>
-                                    <div class="form-check form-check-inline">
-                                        <input type="checkbox" name="valida_qr" class="form-check-input" id="edit_valida_qr">
-                                        <label class="form-check-label" for="valida_qr">
-                                        Disponible para validar
-                                        </label>
-                                    </div>
+                                <label class="form-label">Clave</label>
+                                <input type="text"  id='edit_clave' name='clave' class="form-control " placeholder="Clave">
+                            </div>
+                        </div><!-- Col -->
+                        <div class="col-sm-9">
+                            <div class="mb-3">
+                                <label class="form-label">Descripción</label>
+                                <input type="text"  id='edit_descripcion' name="descripcion" class="form-control" placeholder="Descripción">
+                            </div>
+                        </div><!-- Col -->
+                        
+                    </div><!-- Row -->
+                    <div class="row">
+                        <div class="col-sm-3">
+                            <div class="mb-3">
+                                <label class="form-label">Bitacora</label>
+                                <input type="text"  id='edit_bitacora' name="bitacora" class="form-control" placeholder="Bitacora">
+                            </div>
+                        </div><!-- Col -->
+                        <div class="col-sm-9">
+                            <div class="mb-3">
+                                <label class="form-label">Resultado por defecto</label>
+                                <input type="text"  id='edit_defecto' name="defecto" class="form-control" placeholder="Resultado">
+                            </div>
+                        </div><!-- Col -->
+                        
+                    </div><!-- Row -->
+                    <div class="row">
+                        <div class="col-sm-3">
+                            <div class="mb-3">
+                                <label class="form-label">Unidad</label>
+                                <input type="text"  id='edit_unidad' name="unidad" class="form-control" placeholder="Unidad">
+                            </div>
+                        </div><!-- Col -->
+                        <div class="col-sm-3">
+                            <div class="mb-3">
+                                <label class="form-label">Dígitos</label>
+                                <input type="number"  id='edit_digito' name="digito" min='0' class="form-control " placeholder="Digitos">
+                            </div>
+                        </div><!-- Col -->
+                        <div class="col-sm-6">
+                            <div class="mb-3">
+                                <label class="form-label">Tipo resultado</label>
+                                <select id='edit_tipo_resultado' onchange="edit_displayValues()" name="tipo_resultado" class="js-example-basic-single form-select" data-width="100%">
+                                    <option selected disabled>Seleccione</option>
+                                    <option value="subtitulo">Subtitulo</option>
+                                    <option value="texto">Texto</option>
+                                    <option value="numerico">Númerico</option>
+                                    <option value="documento">Documento</option>
+                                    <option value="referencia">Valor referenciado</option>
+                                    <option value="imagen">Imagen</option>
+                                </select>
+                            </div>
+                        </div><!-- Col -->
+                    </div>
+                    <div class="row" id="edit_showReferencia" style="display: none;">
+                        <div class="col-sm-12">
+                            <div class="mb-3">
+                                <label class="form-label">Referencia</label>
+                                <input type="text" id="edit_valor_referencia" name="valor_referencia" class="form-control" placeholder="Referencia">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row" id="edit_showEstado" style="display: none;">
+                        <div class="col-sm-6">
+                            <div class="mb-4">
+                                <div class="form-check form-check-inline">
+                                    <input type="radio" class="form-check-input" value="abierto" name='tipo_referencia' id="edit_tipo_referencia1">
+                                    <label class="form-check-label" for="radioInline">
+                                        Abierto
+                                    </label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input type="radio" class="form-check-input" value="restringido" name='tipo_referencia' id="edit_tipo_referencia2">
+                                    <label class="form-check-label" for="radioInline1">
+                                        Restringido
+                                    </label>
+                                </div>
+                            </div>
+                        </div><!-- Col -->
+                    </div><!-- Row -->
+                    <div class="row" id="edit_showTipoValidacion" style="display: none;">
+                        <div class="col-sm-12">
+                            <div class="mb-3">
+                                <label class="form-label">Tipo validación</label>
+                                <input type="text" id="edit_tipo_validacion" name="tipo_validacion" class="form-control" placeholder="Tipo validación">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row" id='edit_showNumerico' style="display: none;">
+                        <div class="col-sm-4">
+                            <div class="mb-3">
+                                <div class="mb-3">
+                                    <label class="form-label">Número 1</label>
+                                    <input type="number" id="edit_numero_uno" name="numero_uno" min='0' class="form-control" placeholder="Número 1">
+                                </div>
+                            </div>
+                        </div><!-- Col -->
+                        <div class="col-sm-4">
+                            <div class="mb-3">
+                                <label class="form-label">Número 2</label>
+                                <input type="number" id='edit_numero_dos' name="numero_dos" min='0' class="form-control" placeholder="Número 2">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row" id="edit_showDocumento" style="display: none;">
+                        <div class="col-sm-12">
+                            <div class="mb-3">
+                                <label class="form-label">Documento</label>
+                                <textarea class="form-control" name="documento" id="edit_documentExample" cols="30" rows="3" placeholder="Documento"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="mb-3">
+                            <label class="form-label">Validación</label>
+                            <div>
+                                <div class="form-check form-check-inline">
+                                    <input type="checkbox" name="valida_qr" class="form-check-input" id="edit_valida_qr">
+                                    <label class="form-check-label" for="valida_qr">
+                                    Disponible para validar
+                                    </label>
                                 </div>
                             </div>
                         </div>
-                        <button type="submit" class="btn btn-primary submit">Guardar</button>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar modal</button>
-                    {{-- <button type="button" class="btn btn-primary">Save changes</button> --}}
-                </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary submit">Guardar</button>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar modal</button>
+                {{-- <button type="button" class="btn btn-primary">Save changes</button> --}}
             </div>
         </div>
     </div>
+</div>
+{{-- Revisar porque si añades el permiso se omite el modal de editar analito aun cuando se tiene el permiso --}}
+@can('editar_analitos')
 @endcan
 
 {{-- Editar imagen de analito --}}

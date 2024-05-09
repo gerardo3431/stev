@@ -86,37 +86,17 @@ var BindDataTable = function(response){
         },
         data: response,
         columns: [
-            {data: null, render: function(data) {
-                switch(data.action) {
-                    case 'store':
-                        return 'Se ha guardado';
-                    case 'update':
-                        return 'Se ha actualizado';
-                    case 'delete':
-                        return 'Se ha eliminado';
-                    default:
-                        return data.action;
-                }
-            }},
-            {data: 'srce_model'},
+            {data: 'log_name'},
+            {data: 'description'},
+            {data: 'subject_type'},
+            {data: 'subject_id'},
+            {data: 'causer_type'},
+            {data: 'causer_id'},
             {data: null, render: function(data){
-                if(data.clave){
-                    return data.clave;
-                }else if(data.folio != null){
-                        return data.folio;
-                }else{
-                    return data.srce_id;
-                }
+                console.log(data);
+                return data.properties.estudio ?? (data.properties.perfil ?? 'Deshabilitado'); 
             }},
-            {data: 'trgt_model'},
-            {data: null, render: function(data){
-                if(data.trgt_model == 'Folios'){
-                    return data.folio;
-                }else{
-                    return data.trgt_id;
-                }
-            }},
-            {data: null, render: function(data){
+            {data: null, render: function (data){
                 return moment(data.created_at).format('DD-MM-YYYY HH:mm:ss')
             }}
         ],

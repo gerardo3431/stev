@@ -2,7 +2,7 @@
 
     /* Cambiar las propiedades para alinearse con el generador de pdf */
     @page { 
-        margin: 190px 5px; 
+        margin: 190px 15px; 
         /* margin: 165px 10px;  */
         /* margin: 165px 25px; */
         /* margin: 220px 25px; */
@@ -14,7 +14,7 @@
         font-family: 'Noto Sans', sans-serif;
         line-height: 1;
         font-size: 11px;
-        margin-top: 60px;
+        margin-top: -10px;
         margin-bottom: 100px;
     }
     
@@ -27,20 +27,26 @@
         width: 800px;
         max-width: 805px;
         z-index: -9999;
-        background-image: url('../storage/app/public/membrete_laboratorios/RECIBO-DE-PAGO.png' ); 
+        background-image: url('../storage/app/public/membrete_laboratorios/COTIZACIONES.png' ); 
         background-size: 100%;
         background-repeat: no-repeat; 
     }
 
     .header { 
         position: fixed; 
-        top: -50px;
+        top: -80px;
+        /* background-color:aqua; */
     }
 
     .footer { 
         position: fixed; 
-        bottom: -75px; 
-        height: 190px; 
+        bottom: -165px; 
+        left: 0; 
+        right: 0; 
+        height: 145px; 
+        /* Para kuxtal */
+        /* height: 135px;  */
+        /* background-color: aqua */
     }
     
     .footer .page:after {
@@ -124,28 +130,32 @@
 
     .col-one{
         width: 10%; 
+        max-width: 10%;
         text-align: center;
         
     }
     .col-two{
-        width: 20%; 
+        width: 30%; 
+        max-width: 30%;
         text-align: center;
         
     }
     .col-three{
-        width: 30%; 
+        width: 10%; 
+        max-width: 10%;
         text-align: center;
         
     }
     .col-four{
-        width: 20%; 
+        width: 5%; 
+        max-width: 5%;
         text-align: center;
         
     }
     .col-five{
-        width: 20%; 
-        text-align: center;
-        
+        width: 45%; 
+        max-width: 45%;
+        text-align: justify;
     }
     
     /* Para divisiones de dos con un div mas grande lado izquierdo con miras al centro de la hoja (segun largo)*/

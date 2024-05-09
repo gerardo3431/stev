@@ -75,7 +75,7 @@ class PatientiFileJob implements ShouldQueue
                     $file->useTemplate($template, ['adjustPageSize' => true]);
                 }
             }
-            $file->Output('F', 'public/storage/patient_files/F-'.$this->folio.'.pdf');
+            $file->Output('F', Storage::disk('public')->path('patient_files/F-'.$this->folio.'.pdf'));
             $entre_paciente    = $query->update(['patient_file' => 'patient_files/F-'.$this->folio.'.pdf']);
             $entrega    = $query->historials()->update(['entrega'=> 'entregado']);
 

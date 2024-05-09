@@ -46,8 +46,7 @@ class GeneratePdfImg implements ShouldQueue
      *
      * @return void
      */
-    public function handle()
-    {
+    public function handle(){
         //
         $user           = $this->usuario;
         $idFolio        = $this->folio;

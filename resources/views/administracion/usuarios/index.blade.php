@@ -33,7 +33,7 @@
                     <div class="card-body">
                         <h4 class="card-title">Plantilla laboral</h4>
                         <div class="table-responsive">
-                            <table class="table table-hover table-bordered " id="tableUsuarios" width="100%">
+                            <table class="table table-hover display table-bordered " id="tableUsuarios" width="100%">
                                 <thead>
                                     <tr>
                                         <th>#</th>
@@ -53,7 +53,7 @@
                                             <tr>
                                                 <td>{{$usuario->id}}</td>
                                                 <td>{{$usuario->name}}</td>
-                                                <td>
+                                                <td style="white-space: normal">
                                                     @foreach ($usuario->sucursal()->get() as $sucursal)
                                                         <span class="badge bg-primary">
                                                             {{$sucursal->sucursal}}                                            
@@ -68,7 +68,7 @@
                                                     @endforeach
                                                 </td>
                                                 
-                                                <td>
+                                                <td > 
                                                     @if ($usuario->hasRole('Doctor') || $usuario->hasRole('Empresa'))
                                                     @else
                                                         @can('editar_usuarios')

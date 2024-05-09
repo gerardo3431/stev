@@ -2,7 +2,13 @@
     <table style="line-height: 0.5;">
         <tr >
             <td class="col-left" style="border-bottom: none; line-height: 0.5;">
-                
+                <div style="font-size: 10px">
+                    <strong>Total: </strong>  $ {{ $estudios->sum('precio')  }}.00
+                </div>
+                <br>
+                <div style="font-size: 10px">
+                    <strong>Observaciones: </strong> {{$observaciones['observaciones']}}
+                </div>
             </td>
             <td class="col-center" style="border-bottom: none; line-height: 0.5;">
                 

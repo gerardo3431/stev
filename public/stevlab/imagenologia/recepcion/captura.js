@@ -12,7 +12,7 @@ function guardarEstudios(obj){
         // console.log(valor);
         // text_documento.getData();
         if(ejemplo == 'Imagen'){
-            // let prueba = $(this).find('.storeDato')[0].files[0];
+            let prueba = $(this).find('.storeDato')[0].files[0];
         }else if(ejemplo == 'Documento'){
             let id = $(this).find('.idAnalito').val();
             let clave = $(this).find('.claveDato').text().trim();
@@ -169,6 +169,7 @@ function validarEstudios(obj){
 function invalidarEstudios(obj){
     let estudios = [];
     let folio = $(obj).parents('.asignEstudio').find('.folioEstudio').val();
+    let identificador = $(obj).parents('.asignEstudio').find('.claveEstudio').text();
 
     $(obj).parents('.asignEstudio').find('.listDato').each(function(){
         let id = $(this).find('.idAnalito').val()
@@ -192,17 +193,17 @@ function invalidarEstudios(obj){
     });
 
     // Enviar para invalidar
-    const validar = axios.post('/stevlab/captura/invalidar-estudios', {
+    const validar = axios.post('/stevlab/captura/invalidar-estudios-img', {
         folio: folio,
         estudios,
+        identificador
     }).then(function(respuesta){
+        console.log(respuesta.data);
         // Deshabilitar botones
         $(obj).parents('.listButtons').find('.saveData').attr('disabled', false);
         $(obj).parents('.listButtons').find('.validateData').attr('disabled', false);
         $(obj).parents('.listButtons').find('.invalidateData').attr('disabled', true);
 
-        
-        
         // Notificacion
         const Toast = Swal.mixin({
             toast: true,
@@ -211,18 +212,18 @@ function invalidarEstudios(obj){
             timer: 3000,
             timerProgressBar: true,
         });
-        if(respuesta.data.response == true){
+        if(respuesta.data.success == true){
 
             Toast.fire({
                 icon: 'success',
-                title: respuesta.data.msj,
+                title: respuesta.data.message,
             });
 
             
         }else{
             Toast.fire({
                 icon: 'error',
-                title: respuesta.data.msj,
+                title: respuesta.data.message,
             });
         }
         // // Reload
@@ -239,17 +240,17 @@ function uploadImagen(obj){
     var CSRF_TOKEN = $('meta[name="_token"]').attr('content');
 
     var data = new FormData();
-    // var file = $(obj)[0].files[0] ;
+    var file = $(obj)[0].files[0] ;
 
     let folio = $(obj).parents('.asignEstudio').find('.folioEstudio').val();
-    let identi = $(obj).parents('.asignEstudio').find('.claveEstudio').text();
+    let identi = $(obj).parents('.asignEstudio').find('.claveEstudio').text().trim();
 
     let id = $(obj).parents('.listDato').find('.idAnalito').val();
     let clave = $(obj).parents('.listDato').find('.claveDato').text().trim();
     let descripcion = $(obj).parents('.listDato').find('.descripcionDato').text();
     // let valor = $(this).find('.storeDato').val();
     data.append('_token', CSRF_TOKEN);
-    // data.append('file', file);
+    data.append('file', file);
     data.append('folio', folio);
     data.append('id_analito', id);
     data.append('clave', clave);
@@ -257,21 +258,15 @@ function uploadImagen(obj){
     data.append('identificador', identi);
 
 
-    return data;
-    // $.ajax({
-    //     url: '/stevlab/captura/store-imagen-imagenologia',
-    //     type: 'post',
-    //     data: data,
-    //     contentType: false,
-    //     processData: false,
-    //     success: function(response) {
-    //         console.log(response);
-    //         $('.asignEstudio'+identi).find('.listDato'+clave).find('.idAnalito').val(response.id);
-    //     },
-    //     error: function(err){
-    //         console.log(err);
-    //     }
-    // });
+    $.ajax({
+        url: '/stevlab/captura/store-zip-estudios',
+        type: 'post',
+        data: data,
+        contentType: false,
+        processData: false,
+        success: function(response) {
+            console.log($('.asignEstudio'+identi).find('.listDato'+clave).find('.idAnalito').val(response.id));
+            $('.asignEstudio'+identi).find('.listDato'+clave).find('.idAnalito').val(response.id);
+        }
+    });
 }
-
-

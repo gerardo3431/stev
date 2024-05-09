@@ -19,7 +19,17 @@
   {{-- Fin breadcrumb recepcion --}}
   {{-- Inicia panel's detalle --}}
   {{-- @dd(Auth::user()->first()) --}}
+  
 <!----------------------------------------------------------------------------------------------------->
+@if (session('msj'))
+
+<div class="alert alert-danger alert-dismissible  fade show" role="alert">
+    <i data-feather="alert-circle"></i>
+    <strong>Aviso!</strong> {{ session('msj') }} </a>. 
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="btn-close"></button>
+</div>
+@endif
+
 @if (session('status') == 'Debes aperturar caja antes de empezar a trabajar.')
 
 <div class="alert alert-secondary alert-dismissible fade show" role="alert">

@@ -220,7 +220,7 @@ function check_estudio(response){
     let list =`<tr>
                     <th>${response.clave}</th>
                     <td >${response.descripcion}</td>
-                    <td>Estudios</td>
+                    <td>${response.tipo}</td>
                     <td>
                         <span>
                         ${response.precio}
@@ -268,7 +268,7 @@ function check_imagen(response){
     let list =`<tr>
         <th>${response.clave}</th>
         <td >${response.descripcion}</td>
-        <td>Perfiles</td>
+        <td>Imagenologia</td>
         <td>
             <span>
             ${response.precio}

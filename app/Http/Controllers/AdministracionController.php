@@ -19,6 +19,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
+use Spatie\Activitylog\Models\Activity;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\hasRole;
@@ -32,54 +33,64 @@ class AdministracionController extends Controller
         $fecha_inicial  = Carbon::createFromFormat('d/m/Y', $request->input('fecha_inicio'))->startOfDay();
         $fecha_final    = Carbon::createFromFormat('d/m/Y', $request->input('fecha_final'))->endOfDay();
 
-        $query = Log::query();
+        $consulta = Activity::when($request->usuario !== 'todo', function ($query) use ($request){
+            $query->where('causer_id', $request->input('usuario'));
+        })
+        ->whereBetween('created_at', [$fecha_inicial, $fecha_final])
+        ->get();
 
-        // si se proporciona un ID de usuario, filtrar por ese usuario
-        if (is_numeric($usuario)) {
-            $query->where('user_id', $usuario);
-        }else if($usuario === 'todo'){
-            // No realizar accion
-        }else{
-            return response()->json([
-                'response'  => false,
-                'note'       => 'Dato ingresado al buscador no es tipo de dato admisible',
-            ], 400);
-        }
+        return $consulta;
+        // $consulta = Activity::when($request->usuario !== null, function ($query) use ($request){
+        //     $query->causedBy($request->usuario);
+        // })
+        // $query = Log::query();
+
+        // // si se proporciona un ID de usuario, filtrar por ese usuario
+        // if (is_numeric($usuario)) {
+        //     $query->where('user_id', $usuario);
+        // }else if($usuario === 'todo'){
+        //     // No realizar accion
+        // }else{
+        //     return response()->json([
+        //         'response'  => false,
+        //         'note'       => 'Dato ingresado al buscador no es tipo de dato admisible',
+        //     ], 400);
+        // }
         
-        // Agregar filtro para usuarios con roles diferentes a "admin" o "superadmin"
-        $query->join('model_has_roles', 'logs.user_id', '=', 'model_has_roles.model_id')
-        ->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
-        ->where('roles.name', '<>', 'admin')
-        ->where('roles.name', '<>', 'superadmin')
-        ->select('logs.*')
-        ->orderBy('id', 'desc');
+        // // Agregar filtro para usuarios con roles diferentes a "admin" o "superadmin"
+        // $query->join('model_has_roles', 'logs.user_id', '=', 'model_has_roles.model_id')
+        // ->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
+        // ->where('roles.name', '<>', 'admin')
+        // ->where('roles.name', '<>', 'superadmin')
+        // ->select('logs.*')
+        // ->orderBy('id', 'desc');
         
-        $query->whereNotNull('srce_model')
-        ->whereNotNull('srce_id')
-        ->whereNotNull('trgt_model')
-        ->whereNotNull('trgt_id')
-        ->whereBetween('logs.created_at', [$fecha_inicial, $fecha_final]);
+        // $query->whereNotNull('srce_model')
+        // ->whereNotNull('srce_id')
+        // ->whereNotNull('trgt_model')
+        // ->whereNotNull('trgt_id')
+        // ->whereBetween('logs.created_at', [$fecha_inicial, $fecha_final]);
     
-        $logs = $query->get();
+        // $logs = $query->get();
 
-        foreach ($logs as $log) {
-            if($log->srce_model == 'Estudio'){
-                $log->clave = Estudio::where('id', $log->srce_id)->first()->clave;
-            }elseif ($log->srce_model == 'Perfil') {
-                $log->clave = Profile::where('id', $log->srce_id)->first()->clave;
-            }elseif ($log->srce_model == 'Imagenologia') {
-                $log->clave = Picture::where('id', $log->srce_id)->first()->clave;
-            }
+        // foreach ($logs as $log) {
+        //     if($log->srce_model == 'Estudio'){
+        //         $log->clave = Estudio::where('id', $log->srce_id)->first()->clave;
+        //     }elseif ($log->srce_model == 'Perfil') {
+        //         $log->clave = Profile::where('id', $log->srce_id)->first()->clave;
+        //     }elseif ($log->srce_model == 'Imagenologia') {
+        //         $log->clave = Picture::where('id', $log->srce_id)->first()->clave;
+        //     }
             
-            if ($log->srce_model == 'Folios') {
-                $log->folio = Recepcions::where('id', $log->srce_id)->first()->folio;
-            }
+        //     if ($log->srce_model == 'Folios') {
+        //         $log->folio = Recepcions::where('id', $log->srce_id)->first()->folio;
+        //     }
 
-            if ($log->trgt_model == 'Folios') {
-                $log->folio = (Recepcions::where('id', $log->trgt_id)->first() != null ) ? Recepcions::where('id', $log->trgt_id)->first()->folio : 'getException target: ' . $log ;
-            }
-        }
-        return $logs;
+        //     if ($log->trgt_model == 'Folios') {
+        //         $log->folio = (Recepcions::where('id', $log->trgt_id)->first() != null ) ? Recepcions::where('id', $log->trgt_id)->first()->folio : 'getException target: ' . $log ;
+        //     }
+        // }
+        // return $logs;
     }
     
     // Cambiar sucursal

@@ -65,7 +65,7 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
 
         // Otros middleware
-        'log' => \App\Http\Middleware\LogActions::class,
+        // 'log' => \App\Http\Middleware\LogActions::class,
         // 'optimizeImages' => \Spatie\LaravelImageOptimizer\Middlewares\OptimizeImages::class,
         // 'role.redirect' => \App\Http\Middleware\RedirectBasedOnRoles::class,
 

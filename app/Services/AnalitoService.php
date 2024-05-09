@@ -22,6 +22,8 @@ class AnalitoService{
         // $birthday =  $paciente->evalueAge();
         // $currentDate = Carbon::now();
 
+        $analito = Analito::where('clave', $clave)->first();
+         
         if($birthday instanceof Carbon){
             $ageDifference = $birthday->diff($currentDate);
 
@@ -31,34 +33,38 @@ class AnalitoService{
             $weeks = floor($ageDifference->days / 7); //Semanas desde el inicio de la fecha
             // dd("Tienes $years años, $months meses, $days días y han pasado $weeks semanas desde tu nacimiento.");
             // dd(intval($years), $years);
-            $valores = Analito::where('clave', $clave)->first()
+            
+            $valoresPorSexo = $analito
                 ->referencias()
-                ->where('edad_inicial', '<=', $years)
-                ->where('edad_final', '>=', $years)
+                ->where('referencias_has_analitos.analito_id', $analito->id)
                 ->where('sexo', $paciente->sexo)
-                ->when($years === 0 && $months === 0, function ($subquery) {
-                    $subquery->where('tipo_inicial', 'dia')
-                        ->where('tipo_final', 'dia');
-                })
-                ->when($years === 0 && $months !== 0, function ($subquery){
-                    $subquery->where('tipo_inicial', 'mes')
-                        ->where('tipo_final', 'mes');
-                })
-                ->when($years !== 0, function ($subquery){
-                    $subquery->where('tipo_inicial', 'año')
-                        ->where('tipo_final', 'año');
-                })
-                ->first();
+                ->get();
+
+            // Aplicar condiciones adicionales utilizando filter() y comparaciones
+            $resultadosFiltrados = $valoresPorSexo->filter(function ($item) use ($years, $months, $days) {
+                return ($years === 0 && $months === 0 && $item->edad_inicial <= $days && $item->edad_final >= $days && $item->tipo_inicial === 'dia' && $item->tipo_final === 'dia')
+                    || ($years === 0 && $months !== 0 && $item->edad_inicial <= $months && $item->edad_final >= $months && $item->tipo_inicial === 'mes' && $item->tipo_final === 'mes')
+                    || ($years !== 0 && $item->edad_inicial <= $years && $item->edad_final >= $years && $item->tipo_inicial === 'año' && $item->tipo_final === 'año');
+            });
+
+            
+            $valores= $resultadosFiltrados->first();
         }else{
-            $valores = Analito::where('clave', $clave)->first()
+            $valores = $analito
                 ->referencias()
                 ->where('edad_inicial', '<=', intval($birthday))
-                ->where('edad_final', '>', intval($birthday))
-                ->where('tipo_inicial', '=', 'año')
-                ->orWhere('tipo_final', '=', 'año')
-                ->orWhere('sexo', '=', $paciente->sexo)
+                ->where('edad_final', '>=', intval($birthday))
+                ->where('sexo', $paciente->sexo)
+                ->when($birthday === 0, function ($query){
+                    $query->where('tipo_inicial', 'dia')
+                        ->orWhere('tipo_final',  'dia');
+                })->when($birthday !== 0, function ($query){
+                    $query->where('tipo_inicial', 'año')
+                        ->orWhere('tipo_final', 'año');
+                })
                 ->first();
         }
+        
         
         return $valores;
     }

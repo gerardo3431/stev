@@ -204,8 +204,12 @@ function genera_venta(e){
         let hoja = $('input[name="factura_radio"]:checked').val();
 
         let queryString = '/stevlab/recepcion/make-note?folio=' + folio + '&pago=' + pago + '&tipo=' + hoja;
+        var queryEtiqueta = '/stevlab/recepcion/genera-etiqueta?id=' + folio;
+
 
         window.open(queryString, '_blank');
+        window.open(queryEtiqueta, '_blank');
+
         renueva_recepcion();
 
     }).catch(function(error){

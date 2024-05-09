@@ -19,10 +19,6 @@ use App\Http\Controllers\PictureController;
 use App\Http\Controllers\RecepcionsController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\ReporteController;
-use App\Http\Controllers\SendResultController;
-use App\Models\Doctores;
-use App\Models\Recepcions;
-use GuzzleHttp\Psr7\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
@@ -88,7 +84,6 @@ Route::middleware([
         'auth:sanctum', 
         config('jetstream.auth_session'), 
         'verified', 
-        'log',
         // 'role.redirect'
     ])->name('stevlab.')->prefix('stevlab')->group(function () {
 
@@ -241,6 +236,7 @@ Route::middleware([
         Route::post('/validar-estudios', [RecepcionsController::class, 'valida_resultados'])->name('validar-estudios');
         // Invalidad resultados
         Route::post('/invalidar-estudios', [RecepcionsController::class, 'invalida_resultados'])->name('invalidar-estudios');
+        Route::post('/invalidar-estudios-img', [RecepcionsController::class, 'invalida_imagenologia'])->name('invalidar-estudios-img');
         // Genera pdf de la sección
         Route::post('/genera-documento-resultados', [RecepcionsController::class, 'genera_documento_resultados'])->name('genera-documento-resultados');
         // Genera todos los resultados de un folio
@@ -263,6 +259,7 @@ Route::middleware([
         Route::post('/store-resultados-estudios', [RecepcionsController::class, 'store_resultados_estudios'])->name('store-resultados-estudios');
         // Guarda la imagen
         Route::post('/store-imagen-estudios', [RecepcionsController::class, 'upload_img_resultados'])->name('/store-imagen-estudios');
+        Route::post('/store-zip-estudios', [RecepcionsController::class, 'upload_zip_file'])->name('/store-zip-estudios');
         // Verifica si el paciente completo el pago
         Route::post('/verifica-pago-paciente', [RecepcionsController::class, 'verify_pending_pay'])->name('verifica-pago-paciente');
 
@@ -586,9 +583,9 @@ Route::middleware([
 
     Route::name('imagenologia.')->prefix('imagenologia')->group(function(){
         // Index captura
-        Route::get('captura', [PictureController::class, 'captura_index'])->name('captura');
+        Route::get('/captura', [PictureController::class, 'captura_index'])->name('captura');
         // Buscar estudios de imagenologia
-        Route::post('search-pictures', [PictureController::class, 'get_pictures'])->name('search-pictures');
+        Route::post('/search-pictures', [PictureController::class, 'get_pictures'])->name('search-pictures');
         // Recupera informacion
         // Route::post('recover-estudios', [PictureController::class, 'get_folio'])->name('recover-estudios');
         // Imagenologia
@@ -620,7 +617,7 @@ Route::middleware([
         Route::post('/search-folios', [HistorialController::class, 'historial_search'])->name('search-folios');
         Route::post('/search-folios-general', [HistorialController::class, 'historial_search_index'])->name('search-folios-general');
         // Retorna historial del paciente
-        Route::post('/generate-report', [HistorialController::class, 'historial_generate'])->name('generate-report');
+        Route::get('/generate-report', [HistorialController::class, 'historial_generate'])->name('generate-report');
     });
 
     Route::name('almacen.')->prefix('almacen')->group(function(){

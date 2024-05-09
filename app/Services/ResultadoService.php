@@ -53,7 +53,7 @@ class ResultadoService{
             
             // Agrupar los estudios filtrados por áreas
             $estudiosAgrupados = $estudios->groupBy(function ($estudio) {
-                return $estudio->areas()->first()->descripcion;
+                return $estudio->areas()->first() ? $estudio->areas()->first()->descripcion : 'SIN AREA';
             });
 
             return (! $estudiosAgrupados->isEmpty()) ? $estudiosAgrupados : null;

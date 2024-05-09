@@ -37,7 +37,7 @@
                 <strong>Usuario:</strong> {{$usuario->name}} --}}
             </td>
             <td class="col-right"  style="border-bottom: none">
-                <strong>Validacion: </strong> {{$folios->updated_at}}
+                <strong>Validacion: </strong> {{$folios->historials()->count() >= 1 ? $folios->historials()->orderBy('updated_at', 'desc')->first()->updated_at : 'No hay validaciones'}}
                 <br>
                 <strong>Turno: </strong> {{$folios->turno}}
                 <br>

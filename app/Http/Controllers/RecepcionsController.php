@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Helpers\Logger;
 use App\Exports\DatosExport;
 use App\Helpers\PaymentHelper;
 use App\Helpers\PdfHelper;
@@ -31,20 +30,16 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
-use App\Jobs\GeneratePdfImg;
 use App\Jobs\MaquilaArchivoImgJob;
 use App\Jobs\MaquilaArchivoJob;
 use App\Jobs\PatientiFileJob;
 use App\Models\Area;
-use App\Models\Laboratory;
-use App\Models\Precio;
 use App\Services\AnalitoService;
 use App\Services\FolioService;
 use App\Services\ImportacionService;
 use App\Services\PdfService;
 use App\Services\PrefolioService;
 use App\Services\ResultadoService;
-use DevRaeph\PDFPasswordProtect\Facade\PDFPasswordProtect;
 use Maatwebsite\Excel\Facades\Excel;
 use Milon\Barcode\DNS1D;
 use setasign\Fpdi\Fpdi;
@@ -188,7 +183,7 @@ class RecepcionsController extends Controller{
         }
 
         // Invoco al logger
-        Logger::logAction($request, 'Folios', $recepcions->id, 'store');
+        activity('recepcion')->performedOn($recepcions)->log('Folio creado');
         
         // Preparar los documentos de consentimiento
         return response()->json([
@@ -200,12 +195,14 @@ class RecepcionsController extends Controller{
     }
 
     public function guardar_estudios(Request $request){
-        // dd($request);
         // $this->folioService->linkStudies($request->lista, 'Estudios', $request->id);
         // $this->folioService->linkStudies($request->perfiles, 'Perfiles', $request->id);
         // $this->folioService->linkStudies($request->imagenes, 'Imagenologia', $request->id);
 
         $response = $this->folioService->linkPrecios($this->folioService->getFolioByID($request->id), $request->lista);
+
+        // Invoco al logger
+        activity('recepcion')->performedOn($this->folioService->getFolioByID($request->id))->log('Estudios guardados para folio objetivo');
 
         return response()->json([
             'success' => true,
@@ -540,12 +537,14 @@ class RecepcionsController extends Controller{
         $descripcion = $request->only('descripcion');
         $identificador = $request->only('identificador');
 
-        $path = $request->file('file')->storeAs('public', 'resultados/imagenes/img-'. $codigo['clave']. '-' . date('mdy') . '.png');
-        $path = 'resultados/imagenes/img-'. $codigo['clave'] . '-' . date('mdy') . '.png';
+        $rand = rand(1,100) . '-'  ;
+        $path = $request->file('file')->storeAs('public', 'resultados/imagenes/img-' . $rand .  $codigo['clave']. '-' . date('mdy') . '.png');
+        $path = 'resultados/imagenes/img-'. $rand .  $codigo['clave'] . '-' . date('mdy') . '.png';
 
         $recepcion = Recepcions::where('folio', $folio['folio'])->first();
         $clave_estudio = Estudio::where('clave', $identificador['identificador'])->first();
 
+        activity('captura')->performedOn($clave_estudio)->withProperties(['folio' => $recepcion->id])->log('Imagen para captura capturada');
         
         $insercion = Historial::updateOrCreate([
             'id' => $id,
@@ -583,8 +582,70 @@ class RecepcionsController extends Controller{
         return $response;
     }
 
+    public function upload_zip_file(Request $request){
+        $id = $request->only('id_analito');
+        $folio = $request->only('folio');
+        $codigo = $request->only('clave');
+        $descripcion = $request->only('descripcion');
+        $identificador = $request->only('identificador');
+
+        if ($request->hasFile('file')) {
+            $extension = $request->file('file')->extension();
+            // dd($extension);
+            $prepathName = rand(1,100) . '-' . $folio['folio'] . '-' . $identificador['identificador'] . '-' . $codigo['clave']. '-' . date('mdy') . '.' . $extension;
+            // $file_name  = 'resultados/imagenes/img-'. rand(1,100) . '-' . $prepathName . '.' . $archivo->getClientOriginalExtension();
+            // Si es una imagen
+            if (in_array($extension, ['jpg', 'jpeg', 'png'])) {
+                $path = $request->file('file')->storeAs('public', 'resultados/imagenes/img-' . $prepathName );
+                $path = 'resultados/imagenes/img-'. $prepathName;
+            } elseif (in_array($extension, ['zip', 'rar'])) {
+                // Si es un archivo comprimido
+                $path = $request->file('file')->storeAs('public',  'resultados/imagenes/img-' . $prepathName);
+                $path = 'resultados/imagenes/img-'. $prepathName; // quitamos la carpeta public
+            } else {
+                // Manejar otros tipos de archivos
+                return response()->json([
+                    'error' => 'El tipo de archivo no es compatible.'
+                ], 400);
+            }
+        } else {
+            return response()->json([
+                'error' => 'No se ha enviado ningún archivo.'
+            ], 400);
+        }
+
+        $recepcion = Recepcions::where('folio', $folio['folio'])->first();
+        $clave_estudio = Picture::where('clave', $identificador['identificador'])->first();
+        activity('captura')->performedOn($clave_estudio)->withProperties(['folio' => $recepcion->id])->log('Imagen para imagenologia capturada');
+
+        $insercion = Historial::updateOrCreate([
+            'id' => $id,
+            'clave' => $codigo['clave'], 
+            'descripcion'=>$descripcion['descripcion'],     
+        ],[
+            'valor' => $path,
+        ]);
+        
+        $consulta = DB::table('historials_has_recepcions')->where([
+            'recepcions_id' => $recepcion->id,
+            'historial_id'  => $insercion->id,
+            'picture_id'    => $clave_estudio->id,
+        ])->first();
+        
+        if(! $consulta){
+            $recepcion->historials()->attach($insercion->id, [
+                'picture_id' => $clave_estudio->id, 
+                'recepcions_id' => $recepcion->id
+            ]);
+        }
+
+        return response()->json([
+            'msj' => true,
+            'id' => $insercion->id,
+        ],201);        
+    }
+
     public function verify_pending_pay(Request $request){
-        // dd($request);
         $folio = $request->only('folio');
 
         $recepcion = Recepcions::where('folio', $folio['folio'])->first();
@@ -619,8 +680,7 @@ class RecepcionsController extends Controller{
         }
 
         $job = MaquilaArchivoJob::dispatch($folio['folio'], $urlFilePath, $urlImgPath);
-
-        Logger::logAction($request, 'Captura', $folio['folio'], null, null, null, 'Maquila archivo');            
+         
 
         return response()->json([
             'pdf'       => '/public/storage/maquila/M-'. $folio['folio'].'.pdf',
@@ -646,8 +706,7 @@ class RecepcionsController extends Controller{
             $urlImgPath = null;
         }
 
-        $job = MaquilaArchivoImgJob::dispatch($folio['folio'], $urlFilePath, $urlImgPath);
-        Logger::logAction($request, 'Captura', $folio['folio'], null, null, null, 'Maquila archivo');            
+        $job = MaquilaArchivoImgJob::dispatch($folio['folio'], $urlFilePath, $urlImgPath);          
 
         return response()->json([
             'pdf'       => '/public/storage/maquila/MI-'. $folio['folio'].'.pdf',
@@ -766,6 +825,9 @@ class RecepcionsController extends Controller{
         $recepcion->estudios()->updateExistingPivot($estudio->id, ['status' => 'capturado']);
 
 
+        // 
+        activity('captura')->performedOn($estudio)->withProperties(['folio' => $recepcion->id])->log('Estudio capturado');
+
         // Retornas algo al sistema
         return response()->json([
             'status' => true
@@ -784,6 +846,9 @@ class RecepcionsController extends Controller{
 
               // Actualizas quien capturo la información 
             $recepcion->estudios()->updateExistingPivot($estudio->id, ['status' => 'validado']);
+            $recepcion->historials()->where('estudio_id', $estudio->id)->update(['estatus'=>'validado']);
+
+            activity('captura')->performedOn($estudio)->withProperties(['folio' => $recepcion->id])->log('Estudio validado');
 
             return response()->json([
                 'success' => true,
@@ -799,6 +864,7 @@ class RecepcionsController extends Controller{
     }
 
     public function invalida_resultados(Request $request){
+        // dd($request);
         $user = User::where('id', Auth::user()->id)->first(); 
         // dd($user->hasPermissionTo('invalida_resultados'));
         if($user->hasPermissionTo('invalida_resultados')){
@@ -810,6 +876,8 @@ class RecepcionsController extends Controller{
             $estudio = Estudio::where('clave', $referencia['identificador'])->first();
     
             $recepcion->estudios()->updateExistingPivot($estudio->id, ['status' => 'capturado']);
+    
+            activity('captura')->performedOn($estudio)->withProperties(['folio' => $recepcion->id])->log('Estudio invalidado');
     
             return response()->json([
                 'success' => true,
@@ -826,7 +894,7 @@ class RecepcionsController extends Controller{
     public function valida_imagenologia(Request $request){
         $user = User::where('id', Auth::user()->id)->first();
         
-        if($user->hasPermissionTo('valida resultados')){
+        if($user->hasPermissionTo('valida_resultados')){
             $folio = $request->only('folio');
             $estudios = $request->only('estudios');
             $referencia = $request->only('identificador');
@@ -845,6 +913,9 @@ class RecepcionsController extends Controller{
             Recepcions::where('id', $recepcion->id)->update([
                 'valida_id' => Auth::user()->id,
             ]);
+
+            activity('captura')->performedOn($clave_estudio)->withProperties(['folio' => $recepcion->id])->log('Estudio para imagenologia validada');
+
             
             if($actualizar) {
                 $recepcion->deparment()->where('deparments.id', $clave_estudio->deparment()->first()->id)->update(['estatus_area' => 'validado']);
@@ -866,6 +937,32 @@ class RecepcionsController extends Controller{
             header("HTTP/1.1 400");
             header('Content-Type: application/json');
             return json_encode($response);
+        }
+    }
+
+    public function invalida_imagenologia(Request $request){
+        $user = User::where('id', Auth::user()->id)->first(); 
+        // dd($user->hasPermissionTo('invalida_resultados'));
+        if($user->hasPermissionTo('invalida_resultados')){
+            $folio = $request->only('folio');
+            $estudios = $request->only('estudios');
+            $referencia = $request->only('identificador');
+    
+            $recepcion = Recepcions::where('folio', $folio)->first(); 
+            $estudio = Picture::where('clave', $referencia['identificador'])->first();
+            activity('captura')->performedOn($estudio)->withProperties(['folio' => $recepcion->id])->log('Estudio imagenologia invalidada');
+    
+            $recepcion->picture()->updateExistingPivot($estudio->id, ['estatus_area' => 'capturado']);
+    
+            return response()->json([
+                'success' => true,
+                'message'=> 'Estudio invalidado'
+            ],201);
+        }else{
+            return response()->json([
+                'success' => false,
+                'message' => 'Usted no tiene el permiso para realizar la validación.'
+            ],401);
         }
     }
 
@@ -919,6 +1016,8 @@ class RecepcionsController extends Controller{
         // Actualiza quien valida
         Recepcions::where('id', $recepcion->id)->update(['captura_id' => Auth::user()->id]);
 
+        activity('captura')->performedOn($clave_estudio)->withProperties(['folio' => $recepcion->id])->log('Estudio imagenologia capturada');
+
         // if($insercion) {
         //     // $insercion->recepcions()->first()
         //     //     ->areas()->where('areas.id', $clave_estudio->areas()->first()->id)
@@ -957,6 +1056,7 @@ class RecepcionsController extends Controller{
 
         $recepcion = Recepcions::where('folio', $folio['folio'])->first();
         $clave_estudio = Picture::where('clave', $identificador['identificador'])->first();
+        activity('captura')->performedOn($clave_estudio)->withProperties(['folio' => $recepcion->id])->log('Estudio para imagenologia validada');
 
         
         $insercion = Historial::updateOrCreate([
@@ -1067,6 +1167,7 @@ class RecepcionsController extends Controller{
         $path = 'public/imagenologia/F-'.$folio['folio'].'.pdf';
         $deletepre = Storage::delete($path); 
         $pathSave = Storage::put($path, $pdf->output());
+        $folios->res_file_img = '/imagenologia/F-'.$folio['folio'].'.pdf';
 
         if($request->membrete == 'si'){
             $membreteFile = new Fpdi('P', 'mm', 'letter');
@@ -1102,19 +1203,77 @@ class RecepcionsController extends Controller{
         $img_valido     = base64_encode(Storage::disk('public')->get($folios->valida()->first()->firma));
         $barcode        = DNS1D::getBarcodeSVG($folios->folio, 'C128', 1.20, 35);
         
-         // JOB creado, realizar pruebas luego
-        try {
-            $job  = GeneratePdfImg::dispatch($usuario, $folios, null, $seleccion, $membrete['membrete'] );
-            $ruta = ['pdf' => '/public/storage/imagenologia/F-'. $folio['folio'] .'.pdf'];
-            return $ruta;
-        } catch (\Throwable $e) {
-            dd($e);
-            // Log::error("Error al generar reporte: ". $e->getMessage() );
+        // Service:
+        $path = 'imagenologia/F-'.$folios->folio.'.pdf';
+
+        $pdfData = [
+            'laboratorio'   => $laboratorio, 
+            'usuario'       => $usuario,
+            'folios'        => $folios,
+
+            'barcode'       => $barcode,
+
+            'fondo'         => $membrete['membrete'],
+
+            'barcode'       => $barcode,
+            // 'membrete'      => 'data:image/jpeg;base64,' .base64_encode($fondo),
+            
+            'img_valido'    => $img_valido,
+        ];
+
+        $pdf = $this->pdfService->generateAndStorePDF('invoices.imagenologia.invoice-single-imagenologia', $pdfData, 'letter', 'portrait', $path, false);
+        // $path = 'public/imagenologia/F-'.$folios->folio.'.pdf';
+        $pathSave = Storage::disk('public')->put($path, $pdf->output());
+        $folios->update(['res_file_img' => 'imagenologia/F-'.$folios->folio.'.pdf']);
+
+        if($membrete['membrete'] === 'si'){
+            switch ($seleccion) {
+                case 'imagenologia':
+                    $fondo = $laboratorio->membrete_img;
+                    break;
+                case 'principal':
+                    $fondo = $laboratorio->membrete;
+                    break;
+                case 'secundario':
+                    $fondo = $laboratorio->membrete_secundario;
+                    break;
+                case 'terciario':
+                    $fondo = $laboratorio->membrete_terciario;
+                    break;
+                default:
+                    $fondo = $laboratorio->membrete_img;
+                    break;
+            }
+
+            $membreteFile = new Fpdi('P', 'mm', 'letter');
+            $documento = $membreteFile->setSourceFile(public_path() . '/storage/' . $folios->res_file_img);
+            $imagen     = public_path(). '/storage/' . $fondo;
+            // $img = Storage::disk('public')->get($fondo);
+            
+            for($pageNo = 1; $pageNo <= $documento; $pageNo++){
+                $template = $membreteFile->importPage($pageNo);
+                $membreteFile->AddPage();
+                $membreteFile->Image($imagen, 0, 0, 216, 279);
+                $membreteFile->useTemplate($template, ['adjustPageSize' => true]);
+            }
+            $membreteFile->Output('F', 'public/storage/imagenologia/F-'.$folios->folio.'.pdf');
         }
+         // JOB creado, realizar pruebas luego
+        // try {
+        //     $job  = GeneratePdfImg::dispatch($usuario, $folios, null, $seleccion, $membrete['membrete'] );
+        //     $ruta = ['pdf' => '/public/storage/imagenologia/F-'. $folio['folio'] .'.pdf'];
+        //     return $ruta;
+        // } catch (\Throwable $e) {
+        //     dd($e);
+        //     // Log::error("Error al generar reporte: ". $e->getMessage() );
+        // }
 
-        $response = ['pdf' => '/public/storage/imagenologia/F-'.$folio['folio'].'.pdf'];
+        // $response = ['pdf' => '/public/storage/imagenologia/F-'.$folio['folio'].'.pdf'];
 
-        return $response;
+        // return $response;
+        return response()->json([
+            'pdf' =>  '/public/storage/' . $path
+        ],201);
     }
 
     // Genera resultados por correo
@@ -1337,7 +1496,9 @@ class RecepcionsController extends Controller{
         $folio = $request->only('folio');
         $membrete = $request->only('membrete');
         $seleccion = $request->seleccion;
-// dd($request);
+        $salto = $request->only('estilo');
+        // dd($folio, $membrete, $seleccion, $salto, $request, );
+        
         // Datos del usuario
         $usuario        = Auth::user();
         $folios         = Recepcions::where('folio', $folio)->first();
@@ -1354,7 +1515,7 @@ class RecepcionsController extends Controller{
             // 'membrete'      => 'data:image/png;base64,' .base64_encode($this->resultadoService->obtainWatermark($request->seleccion)),
             'barcode'       => $this->resultadoService->getBarcode($folios),
             'img_valido'    => $this->resultadoService->getSign($usuario->labs()->first()),
-            'salto'         => $request->estilo,
+            'salto'         => $salto['estilo'],
         ];
         
         $pdf = $this->pdfService->generateAndStorePDF('invoices.resultados.invoice-all-resultado-membrete', $pdfData, 'letter', 'portrait', $path, false);
@@ -1528,7 +1689,9 @@ class RecepcionsController extends Controller{
         $pdf = URL::to('/') . '/public/storage/patient_files/F-'.$folio['folio'].'.pdf';
         $pathpdf = Storage::disk('public')->path('patient_files/F-' . $folio['folio'].'.pdf' );
 
-        $envio          = ProcesaCorreo::dispatch($pdf, $pathpdf, $folios->paciente()->first()->email, $laboratorio, $folios->paciente()->first());
+        $envioPaciente          = ProcesaCorreo::dispatch($pdf, $pathpdf, $folios->paciente()->first()->email, $laboratorio, $folios->paciente()->first());
+        $envioDoctor            = ProcesaCorreo::dispatch($pdf, $pathpdf, $folios->doctores()->first()->email, $laboratorio, $folios->paciente()->first());
+        $envioEmpresa           = ProcesaCorreo::dispatch($pdf, $pathpdf, $folios->empresas()->first()->email, $laboratorio, $folios->paciente()->first());
 
         return response()->json([
             'response'  => true,
@@ -1835,10 +1998,12 @@ class RecepcionsController extends Controller{
         switch ($precio->tipo) {
             case 'Estudio':
                 $estudio = $folio->estudios()->where('clave', $recibo['estudio'])->first();
+                activity('recepcion')->performedOn($folio)->withProperties(['estudio' => $estudio->clave])->log('Estudio eliminado');
                 $folio->estudios()->detach($estudio);
                 break;
             case 'Perfil':
                 $perfil = $folio->recepcion_profiles()->where('clave', $recibo['estudio'])->first();
+                activity('recepcion')->performedOn($folio)->withProperties(['perfil' => $perfil->clave])->log('Perfil eliminado');
                 foreach ($perfil->perfil_estudio()->get() as $key => $value) {
                     $folio->estudios()->detach($value);
                 }
@@ -1846,6 +2011,7 @@ class RecepcionsController extends Controller{
                 break;
             case 'Imagenologia':
                 $estudio = $folio->picture()->where('clave', $recibo['estudio'])->first();
+                activity('recepcion')->performedOn($folio)->withProperties(['imagen' => $estudio->clave])->log('Imagen eliminado');
                 $folio->picture()->detach($estudio);
                 break;
             default:
@@ -1857,7 +2023,6 @@ class RecepcionsController extends Controller{
 
         
         // Bitacora 
-        Logger::logAction($request, 'Estudio', $precio->id, 'delete', 'Folios', $folio->id,);
 
         if($eliminar){
             return response()->json([
@@ -1881,7 +2046,6 @@ class RecepcionsController extends Controller{
 
         $eliminar = $folio->recepcion_profiles()->detach($perfil);
 
-        Logger::logAction($request, 'Perfil', $perfil->id, 'delete', 'Folios', $folio->id,);
         
         if($eliminar){
             return response()->json([
@@ -1905,7 +2069,6 @@ class RecepcionsController extends Controller{
 
         $eliminar = $folio->picture()->detach($img);
 
-        Logger::logAction($request, 'Imagenologia', $img->id, 'delete', 'Folios', $folio->id,);
 
         
         if($eliminar){
@@ -1931,7 +2094,7 @@ class RecepcionsController extends Controller{
         $comentario = Observaciones::create(['observacion' => $coment]);
         $comentario->comentarios()->save($folio);
 
-        Logger::logAction($request, 'Folios', $folio->id, 'update');
+        activity('recepcion')->performedOn($folio)->withProperties(['observacion' => $comentario->observacion])->log('Folio actualizado');
 
         return response()->json([
             'success'   => true,
@@ -2065,6 +2228,7 @@ class RecepcionsController extends Controller{
     public function recepcion_folio_update_estudios(Request $request){
         // dd($request);
         $response = $this->folioService->linkPreciosUpdate($this->folioService->getFolioByID($request->id), $request->lista);
+        activity('recepcion')->performedOn($this->folioService->getFolioByID($request->id))->log('Folio con estudios actualizado');
 
         return response()->json([
             'success' => true,
@@ -2442,7 +2606,7 @@ class RecepcionsController extends Controller{
 
     public function recepcion_delete_folio($id, Request $request){
         $delete = Recepcions::where('id', $id)->delete();
-        Logger::logAction($request,'Folios', $id, 'delete');
+        activity('recepcion')->performedOn(Recepcions::withTrashed()->find($id))->log('Folio eliminado');
         return redirect()->route('stevlab.recepcion.editar');
     }
 
@@ -2786,18 +2950,7 @@ class RecepcionsController extends Controller{
         }
 
         $paciente = $query_folio->paciente()->first();
-        // $ruta = ['pdf' => '/public/storage/patient_files/F-'. $folio['folio'].'.pdf'];
-        // $ruta = ['url' => url('public/storage/patient_files/F-'. $folio['folio'] .'.pdf')];
-        
-        // $ruta = ['laboratorio' => $user->labs()->first()->nombre ];
-        // $ruta = ['nombre_paciente' => $query_folio->paciente()->first()->nombre ];
-        // $ruta = ['correo_paciente' => $query_folio->paciente()->first()->email ];
-        
-        // $ruta = ['nombre_doctor' => $query_folio->doctores()->first()->nombre ];
-        // $ruta = ['correo_doctor' => $query_folio->paciente()->first()->email ];
-
-        // Compress file to encription
-        
+               
         
 
         // return $ruta;

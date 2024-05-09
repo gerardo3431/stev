@@ -12,10 +12,10 @@
     @empty
     @endforelse
 @endif
-
+{{-- 
 @if ($resultados !== null && $perfiles !== null)
     <div class="break"></div>
-@endif
+@endif --}}
 
 @if($perfiles !== null)
     @forelse ($perfiles as $keyPerfil => $perfil)

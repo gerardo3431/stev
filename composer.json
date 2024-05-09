@@ -24,6 +24,7 @@
         "phenx/php-font-lib": "^0.5.4",
         "setasign/fpdf": "1.8.*",
         "setasign/fpdi": "^2.0",
+        "spatie/laravel-activitylog": "^4.8",
         "spatie/laravel-permission": "^5.5",
         "stichoza/google-translate-php": "^5.1",
         "twilio/sdk": "^6.41"

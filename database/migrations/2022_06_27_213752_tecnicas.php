@@ -18,6 +18,7 @@ class Tecnicas extends Migration
             $table->string('descripcion');
             $table->string('observaciones');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

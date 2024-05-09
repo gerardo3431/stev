@@ -3,7 +3,7 @@
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Noto+Sans&display=swap" rel="stylesheet"> 
-        <style>
+        {{-- <style>
             /* Cambiar las propiedades para alinearse con el generador de pdf */
             @page { 
                 margin: 165px 10px; 
@@ -194,7 +194,8 @@
                 object-fit: cover;
             }
 
-        </style>
+        </style> --}}
+        @include('layout.partials.resultados.estilo')
     </head>
 
     <body>

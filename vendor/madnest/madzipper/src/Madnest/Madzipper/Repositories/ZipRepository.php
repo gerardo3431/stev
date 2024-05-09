@@ -9,7 +9,10 @@ class ZipRepository implements RepositoryInterface
 {
     private $archive;
 
-    public bool $open = false;
+    /**
+     * @var bool
+     */
+    public $open = false;
 
     /**
      * Construct with a given path.
@@ -18,7 +21,7 @@ class ZipRepository implements RepositoryInterface
      * @param bool $create
      * @param ZipArchive $archive
      *
-     * @throws \Exception
+     * @throws Exception
      *
      * @return ZipRepository
      */

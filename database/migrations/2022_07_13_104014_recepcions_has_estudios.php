@@ -17,7 +17,7 @@ class RecepcionsHasEstudios extends Migration
             $table->id();
             $table->unsignedBigInteger('recepcions_id');
             $table->unsignedBigInteger('estudio_id');
-            $table->string('status')->default('solicitado');
+            $table->string('status')->default('solicitado')->nullable(true);
 
             $table->foreign('recepcions_id')->references('id')->on('recepcions')->onDelete('restrict')->onUpdate('cascade');
             $table->foreign('estudio_id')->references('id')->on('estudios')->onDelete('restrict')->onUpdate('cascade');

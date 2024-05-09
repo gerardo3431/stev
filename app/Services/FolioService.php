@@ -97,6 +97,7 @@ class FolioService{
         $recepcion->lista()->attach($new_lista);
         // Para obtener los estudios, perfiles, imagenologias y guardarlos igual
         // Creo que seria mejor omitirlos de una vez
+
         // Para que lista de precios sea el unico que despliegue asocia
         foreach ($new_lista as $key => $estudio) {
             // dd($estudio);
@@ -200,6 +201,8 @@ class FolioService{
      * @return mixed
      */
     public function query_builder(Request $request, Carbon $fecha_inicio, Carbon $fecha_final){
+        
+
         $folios = Recepcions::when($request->area !== 'todo', function($query) use ($request){
             $query->whereHas('areas', function($query) use ($request){
                 $query->where('area_id', $request->area);
@@ -328,8 +331,10 @@ class FolioService{
 
     protected function get_estudies_area(Model $folio, Request $request){
         // dd($folio->recepcion_profiles()->pluck('profiles.id')->toArray());
+        $filtro = $folio->lista()->where('tipo', 'Estudio')->get()->pluck('clave');
         $consulta = $folio
             ->estudios()
+            ->whereIn('clave', $filtro)
             ->when($request->areaId !== 'todo', function ($query) use ($request){
                 $query->whereHas('area', function($query) use ($request){
                     $query->where('area_id', $request->areaId);
@@ -341,13 +346,16 @@ class FolioService{
                     ->whereIn('profile_id', $folio->recepcion_profiles()->pluck('profiles.id')->toArray());
             })
             ->get();
+            // dd($consulta);
         $reload = $this->loadInformation($folio, $consulta);
         return $reload;
     }
 
     protected function get_profiles_area(Model $folio, Request $request){
         // Obtienes todos los perfiles
-        $consulta =  $folio->recepcion_profiles()->get();
+        $filtro = $folio->lista()->where('tipo', 'Perfil')->get()->pluck('clave');
+
+        $consulta =  $folio->recepcion_profiles()->whereIn('clave', $filtro)->get();
         foreach($consulta as $key=>$perfil){
             // Prevenir estudios sin agregar al perfil o estudios eliminados de perfiles
             $this->preventInformation($folio, $perfil->perfil_estudio()->get()->pluck('clave'));
@@ -356,17 +364,27 @@ class FolioService{
         }
         return $consulta;
     }
+    // protected function get_imagenologia_area(Model $folio, Request $request){
+    //     $imagenologia = $folio->picture()->when($request->areaId != 'todo', function ($query) use ($request){
+    //         $query->whereHas('deparment', function ($query) use ($request){
+    //             $query->where('deparments_id', $request->areaId);
+    //         });
+    //     })->get();
 
+    //     foreach ($imagenologia as $key => $img) {
+    //         $img->analitos = $img->analitos()->orderBy('pictures_has_analitos.orden', 'asc')->get();
+    //     }
+
+    //     return $imagenologia;
+    // }
     protected function get_imagenologia_area(Model $folio, Request $request){
-        $imagenologia = $folio->picture()->when($request->areaId != 'todo', function ($query) use ($request){
+        $consulta = $folio->picture()->when($request->areaId != 'todo', function ($query) use ($request){
             $query->whereHas('deparment', function ($query) use ($request){
                 $query->where('deparments_id', $request->areaId);
             });
         })->get();
 
-        foreach ($imagenologia as $key => $img) {
-            $img->analitos = $img->analitos()->orderBy('pictures_has_analitos.orden', 'asc')->get();
-        }
+        $imagenologia = $this->loadInformationImg($folio, $consulta);
 
         return $imagenologia;
     }
@@ -416,6 +434,26 @@ class FolioService{
         return $estudios;
     }
 
+    public function loadInformationImg(Model $folio, Mixed $estudios){
+        foreach ($estudios as $key => $estudio) {
+            $estudio->analitos = $estudio->analitos()->orderBy('pictures_has_analitos.orden', 'asc')->get();
+            foreach ($estudio->analitos as $key => $analito) {
+                $consulta_historial = $folio->historials()->where('historials_has_recepcions.picture_id', $estudio->id)
+                    ->where('historials.clave', $analito->clave)
+                    ->first();
+                
+                if($consulta_historial){
+                    $analito->id_valor_captura = $consulta_historial->id;
+                    $analito->valor_captura = $consulta_historial->valor;
+                }
+
+                $estudio->validacion = $folio->picture()->where('picture_id', $estudio->id)->value('recepcions_has_deparments.estatus_area');
+            }
+
+        }
+        
+        return $estudios;
+    }
 
     protected function preventInformation(Model $folio, Mixed $estudios){
         // dd($folio);

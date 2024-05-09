@@ -3,7 +3,7 @@
         Options -MultiViews -Indexes
     </IfModule>
 
-    <Files ~ "\.(env|json|config.js|md|gitignore|gitattributes|lock|artisan)$">
+    <Files ~ "\.(env|json|config.js|md|gitignore|gitattributes|lock|artisan|zip)$">
         Order allow,deny
         Deny from all
     </Files>
@@ -16,11 +16,11 @@
 
     #First rewrite any request to the wrong domain to use the correct one (here www.)
     RewriteCond %{HTTP_HOST} ^www\.
-    RewriteRule ^(.*)$ https://laboratorios.dev/$1 [L,R=301]
+    RewriteRule ^(.*)$ https://laboratorios.test/$1 [L,R=301]
 
     #Now, rewrite to HTTPS:
     RewriteCond %{HTTPS} off
-    RewriteRule ^(.*)$ https://laboratorios.dev/$1 [L,R=301]
+    RewriteRule ^(.*)$ https://laboratorios.test/$1 [L,R=301]
 
     # Redirect Trailing Slashes If Not A Folder...
     RewriteCond %{REQUEST_FILENAME} !-d

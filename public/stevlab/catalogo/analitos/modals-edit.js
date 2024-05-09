@@ -35,8 +35,14 @@ function editarAnalito(obj){
         $('#edit_numero_uno').val(analitos.numero_uno);
         $('#edit_numero_dos').val(analitos.numero_dos);
         // $('#edit_documento').val(analitos.documento);
-
-        textarea_edit_analito(analitos.documento);
+        if(analitos.tipo_resultado === 'documento'){
+            // setTimeout(function(){
+            //     window.location.reload();
+            // }, 3100);
+            setTimeout(() => {
+                textarea_edit_analito(analitos.documento);
+            }, 3600);
+        }
         edit_displayValues();
         validar_formulario_edit_analitos();
 

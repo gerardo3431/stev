@@ -2,22 +2,29 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Doctores;
-use App\Models\Historial;
-use App\Models\Pacientes;
 use App\Models\Estudio;
 use App\Models\Recepcions;
 use App\Models\User;
+use App\Services\PdfService;
+use App\Services\ResultadoService;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
-use Milon\Barcode\DNS1D;
+use setasign\Fpdi\Fpdi;
+use setasign\Fpdi\PdfParser\StreamReader;
 
 class HistorialController extends Controller
 {
-    //
+    protected $resultadoService;
+    protected $pdfService;
+
+    public function __construct(ResultadoService $resultadoService, PdfService $pdfService)
+    {
+        $this->resultadoService = $resultadoService;
+        $this->pdfService = $pdfService;
+
+    }
 
     public function historial_index(){
 
@@ -71,26 +78,67 @@ class HistorialController extends Controller
 
 
     public function historial_generate(Request $request){
-        $date = Date('dmys');
+        
+
+        // dd($request);
         $folio = $request->only('folio');
+        $usuario = Auth::user();
+        $folios = Recepcions::where('folio', $folio['folio'])->first();
+        
+        $pdfData = [
+            'laboratorio'   => $usuario->labs()->first(), 
+            'usuario'       => $usuario,
+            'folios'        => $folios,
+            'resultados'    => $this->resultadoService->getDataStudie($folios),
+            'perfiles'      => $this->resultadoService->getDataProfile($folios),
+            'fondo'         => 'si', 
+            'barcode'       => $this->resultadoService->getBarcode($folios),
+            'img_valido'    => $this->resultadoService->getSign($usuario->labs()->first()),
+            'salto'         => 'no',
+        ];
+        $pdf = Pdf::loadView('invoices.resultados.invoice-all-resultado-membrete', $pdfData);
+        $pdf->setPaper('letter', 'portrait');
+        $pdf->render();
+        return $pdf->stream();
 
-        $usuario        = User::where('id', Auth::user()->id)->first();
-        $laboratorio    = $usuario->labs()->first();
-        $sucursal       = $usuario->sucs()->where('estatus', 'activa')->first();
-        $folios         = Recepcions::where('folio', $folio)->first();
 
-        $pacientes      = $folios->paciente()->first();
-        $edad           = Carbon::createFromFormat('d/m/Y', $pacientes->fecha_nacimiento)->age;
+        // $membrete = public_path(). '/storage/' . $usuario->labs()->first()->membrete;
+        // $tempPath = Storage::disk('public')->path('/');
+        // $pdf = Pdf::loadView('invoices.resultados.invoice-all-resultado-membrete', $pdfData);
+        // $pdf->setPaper('letter', 'portrait');
+        // $pdf->render();
+        // $pdf->setOption('setTempDir', $tempPath);
+        // $canvas = $pdf->getCanvas();
+        // $pdfWidth = $canvas->get_width();
+        // $pdfHeight = $canvas->get_height();
+        // $canvas->image($membrete, 0, 0, $pdfWidth, $pdfHeight);
+        // $canvas->set_opacity(0.1);
+        // $canvas->set_default_view("XYZ");
+        // return $pdf->stream();
+        // $this->pdfService->insertWatermark($folios, 'si', 'principal', $tempPath);
 
-        $doctor         = Doctores::where('id', $folios->id_doctor)->first();
 
-        if($folios->estado === 'pagado'){
-            $request = ['pdf' => '/public/storage/resultados-completos/F-'.$folio['folio'].'.pdf'];
+
+        // $date = Date('dmys');
+        // $folio = $request->only('folio');
+
+        // $usuario        = User::where('id', Auth::user()->id)->first();
+        // $laboratorio    = $usuario->labs()->first();
+        // $sucursal       = $usuario->sucs()->where('estatus', 'activa')->first();
+        // $folios         = Recepcions::where('folio', $folio)->first();
+
+        // $pacientes      = $folios->paciente()->first();
+        // $edad           = Carbon::createFromFormat('d/m/Y', $pacientes->fecha_nacimiento)->age;
+
+        // $doctor         = Doctores::where('id', $folios->id_doctor)->first();
+
+        // if($folios->estado === 'pagado'){
+        //     $request = ['pdf' => '/public/storage/resultados-completos/F-'.$folio['folio'].'.pdf'];
     
-            return $request;
-        }else{
-            return ['msj' => 'No hay datos guardados para mostrar en este folio.'];
-        }
+        //     return $request;
+        // }else{
+        //     return ['msj' => 'No hay datos guardados para mostrar en este folio.'];
+        // }
     }
 
 

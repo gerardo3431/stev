@@ -40,7 +40,7 @@
                 
             </td>
             <td class="col-right"  style="border-bottom: none">
-                <strong>Validacion: </strong> <?php echo e($folios->updated_at); ?>
+                <strong>Validacion: </strong> <?php echo e($folios->historials()->orderBy('updated_at', 'desc')->first()->updated_at); ?>
 
                 <br>
                 <strong>Turno: </strong> <?php echo e($folios->turno); ?>

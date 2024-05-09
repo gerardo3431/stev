@@ -19,7 +19,7 @@ class Historials extends Migration
             $table->string('clave');
             $table->string('descripcion');
             $table->text('valor')->nullable();
-            $table->boolean('absoluto');
+            $table->boolean('absoluto')->nullable(true);
             $table->text('valor_abs')->nullable();
             $table->string('estatus')->default('invalidado');
             $table->string('entrega')->default('no entregado');

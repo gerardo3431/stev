@@ -37,7 +37,7 @@ class Pacientes extends Model
     }
 
     public function evalueAge(){
-        return strtotime($this->fecha_nacimiento) ? Carbon::createFromFormat('d/m/Y', $this->fecha_nacimiento) :  $this->edad;
+        return Carbon::createFromFormat('d/m/Y', $this->fecha_nacimiento);
     }
 
     public function specificAge(){

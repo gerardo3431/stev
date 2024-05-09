@@ -47,34 +47,23 @@ class PacienteController extends Controller
         $user = User::where('id', Auth::user()->id)->first(); 
         $doctor = $user->doctor()->first();
         $empresa = $user->empresas_users()->first();
-        // $pacientes = Pacientes::where(function($q) use ($search){
-        //     $q ->where('pacientes.nombre', 'LIKE', '%'. $search['q'].'%');
-        // })->get();
-
-        // $folios = Recepcions::where(function ($query) use ($search){
-        //     $query->whereRelation('paciente', 'pacientes.nombre', 'LIKE', "%". $search['q'] ."%");
-        // })->orWhere(function ($query) use ($empresa){
-        //     $query->orWhereRelation('empresas', 'recepcions.id_empresa', $empresa->id);
-        // })->orWhere(function ($query) use ($doctor){
-        //     $query->orWhereRelation('doctores', 'recepcions.id_doctor', $doctor->id);
-        // })->pluck('id_paciente')->toArray();
 
         $folios = Recepcions::where(function ($query) use ($search){
             $query->whereRelation('paciente', 'pacientes.nombre', 'LIKE', "%". $search['q'] ."%");
-        })->when($empresa !== null, function ($query) use ($empresa){
-            $query->whereRelation('empresas', 'recepcions.id_empresa', $empresa->id);
-        })->when($doctor !== null, function ($query) use ($doctor){
-            $query->whereRelation('doctores', 'recepcions.id_doctor', $doctor->id);
-        })->pluck('id_paciente')->toArray();
+        })->orWhere(function ($query) use ($empresa){
+            $query->when($empresa !== null, function ($subquery) use ($empresa){
+                $subquery->whereRelation('empresas', 'recepcions.id_empresa', $empresa->id);
+            });
+        })->orWhere(function ($query) use ($doctor){
+            $query->when($doctor !== null, function ($subquery) use ($doctor){
+                $subquery->whereRelation('doctores', 'recepcions.id_doctor', $doctor->id);
+            });    
+        })
+        ->pluck('id_paciente')->toArray();
 
 
-        // >pluck('profiles.id')->toArray()
         $pacientes = Pacientes::whereIn('id', $folios)->get();
-        // $filterPacientes = $pacientes->filter(function ($estudio) {
-        //         // return $estudio->analitos->contains(function ($analito) {
-        //         //     return $analito->resultado_esperado !== null;
-        //         // });
-        //     });
+      
         return $pacientes;
     }
     //

@@ -23,35 +23,38 @@ $(function(){
         let valor = $(this).find('td:eq(0)').html();
         // console.log(valor);
         // Obtener observacion general
-    
-        const response = axios.post('/stevlab/historial/generate-report', {
-            _token: CSRF_TOKEN,
-            folio: valor,
-        })
-        .then(res => {
-            console.log(res);
-            if(res.data.msj){
-                // Notificacion
-                const Toast = Swal.mixin({
-                    toast: true,
-                    position: 'top-end',
-                    showConfirmButton: false,
-                    timer: 3000,
-                    timerProgressBar: true,
-                });
+        var queryString = '/stevlab/historial/generate-report?folio=' + valor;
+        window.open(queryString, '_blank');
+        // const response = axios.post('/stevlab/historial/generate-report', {
+        //     _token: CSRF_TOKEN,
+        //     folio: valor,
+        // })
+        // .then(res => {
+        //     console.log(res);
+           
+        //     // var queryString = '/stevlab/recepcion/genera-etiqueta?id=' + folio;
+        //     // window.open(queryString, '_blank');
+        //     // if(res.data.msj){
+        //     //     // Notificacion
+        //     //     const Toast = Swal.mixin({
+        //     //         toast: true,
+        //     //         position: 'top-end',
+        //     //         showConfirmButton: false,
+        //     //         timer: 3000,
+        //     //         timerProgressBar: true,
+        //     //     });
                 
-                Toast.fire({
-                icon: 'error',
-                title: `${res.data.msj}`
-                });
-            }else{
-                window.open(res['data']['pdf']);
-
-            }
-        })
-        .catch((err) =>{
-            console.log(err);
-        });
+        //     //     Toast.fire({
+        //     //     icon: 'error',
+        //     //     title: `${res.data.msj}`
+        //     //     });
+        //     // }else{
+        //     //     window.open(res['data']['pdf']);
+        //     // }
+        // })
+        // .catch((err) =>{
+        //     console.log(err);
+        // });
     
     });
 });

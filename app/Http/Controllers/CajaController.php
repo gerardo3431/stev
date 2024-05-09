@@ -215,6 +215,8 @@ class CajaController extends Controller
                                     'estatus'   => 'abierta',
                                 ]);
             $sucursal->cajas()->attach($caja->id, ['user_id' => $usuario->id, 'subsidiary_id' => $sucursal->id]);
+            // Para registrar el modelo en el log
+            activity('caja')->performedOn($caja)->log('caja aperturada');
         }
 
         
@@ -256,6 +258,7 @@ class CajaController extends Controller
             'estatus'               => 'cerrada', 
         ]);
         // $caja = Caja::where('id', $id)->update(['estatus' => 'cerrada']);
+        activity('caja')->performedOn($caja)->log('caja cerrada');
 
         if($caja){
             session()->flash('caja_estatus', 'Caja cerrada automáticamente...');
@@ -338,9 +341,10 @@ class CajaController extends Controller
     }
 
     public function pay(Request $request){
-        // dd($request);
 
         $create = $this->pagoService->create($request);
+        // Invocamos al log
+
         return response()->json([
             'success' => true,
             'mensaje' => 'Pago realizado con exito',
@@ -358,8 +362,13 @@ class CajaController extends Controller
     }
 
     public function make_note(Request $request){
-        $nota = $this->pagoService->makeNote($request);
-        return $nota->stream();
+        $folio = Recepcions::where('id', $request->folio)->first();
+        if($folio->pago()->first()){
+            $nota = $this->pagoService->makeNote($request);
+            return $nota->stream();
+        }else{
+            return redirect()->route('stevlab.recepcion.editar')->with('msj', 'No hay pagos registrados para este folio.');
+        }
     }
 
     public function genera_reporte_dia(Request $request){

@@ -112,7 +112,8 @@
         th, td {
             border-bottom: 1px solid #ddd;
             word-break: break-all;
-            text-align: justify
+            text-align: justify;
+            /* white-space: no-wrap; */
         }
 
         /* Para divisiones de 3 */
@@ -144,35 +145,41 @@
             width: 25%; 
             max-width: 25%; 
             text-align: left;
+            white-space: no-wrap;
             
         }
         .col-two{
             width: 3%; 
             text-align: left;
+            white-space: no-wrap;
             
         }
         .col-three{
             width: 30%; 
             max-width: 30%; 
             text-align: left;
+            white-space: no-wrap;
             
         }
         .col-four{
             width: 10%; 
             max-width: 10%; 
             text-align: left;
+            white-space: no-wrap;
             
         }
         .col-five{
             width: 10%; 
             max-width: 10%; 
             text-align: left;
+            white-space: no-wrap;
             
         }
         .col-six{
             width: 27%; 
             max-width: 27%; 
             text-align: left;
+            white-space: no-wrap;
         }
         
         /* Para divisiones de dos con un div mas grande lado izquierdo con miras al centro de la hoja (segun largo)*/

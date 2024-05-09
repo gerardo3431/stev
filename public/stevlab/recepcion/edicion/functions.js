@@ -63,6 +63,7 @@ function removeThisOfficialEstudio(obj){
             folio: identificador,
         }).then(function(response){
             $(obj).parent().parent().remove();
+            valuarTotal();
         }).catch(function(error){
             console.log(error);
         });

@@ -63,40 +63,37 @@ class CotizacionController extends Controller
             $estudio->dias_proceso = isset($query->dias_proceso) ? $query->dias_proceso : '.';
             $estudio->condiciones = isset($query->condiciones) ? $query->condiciones : '.';
         }
-        // dd($estudios_listas);
 
         switch ($request->formato) {
             case 'hoja':
                 $pdf = Pdf::loadView('invoices.cotizacion.cotizacion', [
-                    'membrete'          => $memb ,
-                    'fondo'             => 'si',
-        
-                    'empresa'           => $empresa,
-                    'paciente'          => $nombre,
-                    'estudios'          => $estudios_listas,
-                    'total'             => $total, 
-                    'observaciones'     => $observaciones, 
-                    'laboratorio'       => $laboratorio,
-                    'logotipo'          => $logotipo
-                    
-                ]);
+                        'membrete'          => $memb ,
+                        'fondo'             => 'si',
+                        'empresa'           => $empresa,
+                        'paciente'          => $nombre,
+                        'estudios'          => $estudios_listas,
+                        'total'             => $total, 
+                        'observaciones'     => $observaciones, 
+                        'laboratorio'       => $laboratorio,
+                        'logotipo'          => $logotipo
+                    ]);
         
                 $pdf->setPaper('letter', 'portrait' );    
 
                 break;
             case 'ticket':
                 $pdf = Pdf::loadView('invoices.cotizacion.cotizacion-ticket', [
-                    'membrete'          => $memb ,
-                    'fondo'             => 'si',
-                    'empresa'           => $empresa,
-                    'paciente'          => $nombre,
-                    'estudios'          => $estudios_listas,
-                    'total'             => $total, 
-                    'observaciones'     => $observaciones, 
-                    'laboratorio'       => $laboratorio,
-                    'logotipo'          => $logotipo
-                    
-                ]);
+                        'membrete'          => $memb ,
+                        'fondo'             => 'si',
+                        'empresa'           => $empresa,
+                        'paciente'          => $nombre,
+                        'estudios'          => $estudios_listas,
+                        'total'             => $total, 
+                        'observaciones'     => $observaciones, 
+                        'laboratorio'       => $laboratorio,
+                        'logotipo'          => $logotipo
+                        
+                    ]);
                 $ancho = (8 / 2.54) * 72;
                 $pdf->setPaper(array(0, 0, $ancho, 1000),  'portrait'); 
                 break;

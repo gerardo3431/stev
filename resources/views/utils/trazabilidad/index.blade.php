@@ -74,11 +74,13 @@
                         <table id="dataTableTrazabilidad" class="table table-sm table-hover nowrap" width="100%">
                             <thead>
                                 <tr> 
-                                    <th>Accion</th>
-                                    <th>Origen modelo</th>
-                                    <th>#</th>
-                                    <th>Destino modelo</th>
-                                    <th>#</th>
+                                    <th>Nombre log</th>
+                                    <th>Descripcion</th>
+                                    <th>Modelo Objetivo</th>
+                                    <th>Modelo id</th>
+                                    <th>Usuario</th>
+                                    <th>Usuario id</th>
+                                    <th>Propiedades</th>
                                     <th>Fecha</th>
                                 </tr>
                             </thead>

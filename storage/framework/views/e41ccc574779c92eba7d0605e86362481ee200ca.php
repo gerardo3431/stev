@@ -112,7 +112,8 @@
         th, td {
             border-bottom: 1px solid #ddd;
             word-break: break-all;
-            text-align: justify
+            text-align: justify;
+            white-space: no-wrap;
         }
 
         /* Para divisiones de 3 */
